@@ -14,9 +14,10 @@ import Loading from "@/components/ui/Loading";
 import SearchBar from "@/components/molecules/SearchBar";
 import { startTimer, stopTimer } from "@/services/api/timeTrackingService";
 import { createTask, getAllTasks } from "@/services/api/taskService";
+import { getAllProjects } from "@/services/api/projectService";
 
 const Tasks = () => {
-const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,6 +36,23 @@ const [tasks, setTasks] = useState([]);
     projectId: ""
   });
   const [isCreating, setIsCreating] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [projectsLoading, setProjectsLoading] = useState(false);
+  const [projectsError, setProjectsError] = useState("");
+
+  const loadProjects = async () => {
+    try {
+      setProjectsLoading(true);
+      setProjectsError("");
+      const projectData = await getAllProjects();
+      setProjects(projectData);
+    } catch (err) {
+      setProjectsError("Failed to load projects");
+      console.error("Error loading projects:", err);
+    } finally {
+      setProjectsLoading(false);
+    }
+  };
   const loadTasks = async () => {
     try {
       setLoading(true);
@@ -49,8 +67,9 @@ const [tasks, setTasks] = useState([]);
     }
 };
 
-  useEffect(() => {
+useEffect(() => {
     loadTasks();
+    loadProjects();
   }, []);
 
   useEffect(() => {
@@ -454,7 +473,7 @@ const getStatusIcon = (status) => {
       {/* Task Creation Modal */}
       <Modal
         isOpen={showTaskModal}
-        onClose={() => {
+onClose={() => {
           setShowTaskModal(false);
           setTaskFormData({
             title: "",
@@ -472,7 +491,7 @@ const getStatusIcon = (status) => {
           onSubmit={async (e) => {
             e.preventDefault();
             
-            if (!taskFormData.title.trim()) {
+if (!taskFormData.title.trim()) {
               toast.error("Please enter a task title");
               return;
             }
@@ -482,18 +501,22 @@ const getStatusIcon = (status) => {
               return;
             }
             
+            if (!taskFormData.projectId) {
+              toast.error("Please select a project");
+              return;
+            }
             try {
               setIsCreating(true);
-              const newTask = await createTask({
-title: taskFormData.title.trim(),
+const newTask = await createTask({
+                title: taskFormData.title.trim(),
                 description: taskFormData.description.trim(),
                 dueDate: taskFormData.dueDate,
-                projectId: taskFormData.projectId,
-});
+                projectId: parseInt(taskFormData.projectId),
+              });
               
               setTasks(prev => [...prev, newTask]);
               setShowTaskModal(false);
-              setTaskFormData({
+setTaskFormData({
                 title: "",
                 description: "",
                 priority: "medium",
@@ -589,17 +612,30 @@ title: taskFormData.title.trim(),
               />
             </div>
 
-            <div>
+<div>
               <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Project ID
+                Project *
               </label>
-              <Input
+              <select
                 id="projectId"
-                type="text"
                 value={taskFormData.projectId}
                 onChange={(e) => setTaskFormData(prev => ({ ...prev, projectId: e.target.value }))}
-                placeholder="Enter project ID"
-              />
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="">Select a project</option>
+                {projectsLoading ? (
+                  <option disabled>Loading projects...</option>
+                ) : projectsError ? (
+                  <option disabled>Error loading projects</option>
+                ) : (
+                  projects.map(project => (
+                    <option key={project.Id} value={project.Id}>
+                      {project.Name}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
           </div>
 
@@ -609,7 +645,7 @@ title: taskFormData.title.trim(),
               variant="outline"
               onClick={() => {
                 setShowTaskModal(false);
-                setTaskFormData({
+setTaskFormData({
                   title: "",
                   description: "",
                   priority: "medium",
