@@ -204,11 +204,12 @@ try {
                 value={formData.projectId}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                disabled={loadingProjects}>
+disabled={loadingProjects}>
                 <option value="">Select a project</option>
+                {projects.map((project) => (
                 <option key={project.Id} value={project.Id}>
                     {project.Name}- Client ID: {project.client_id}
-                </option>))
+                </option>))}
                           </select>
             {errors.projectId && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.projectId}</p>}
         </div>
