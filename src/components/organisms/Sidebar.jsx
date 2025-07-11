@@ -1,19 +1,21 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSelector } from "react-redux";
 import NavigationItem from "@/components/molecules/NavigationItem";
 import ApperIcon from "@/components/ApperIcon";
 import { useSidebar } from "@/hooks/useSidebar";
 
 const Sidebar = () => {
   const { isOpen, closeSidebar } = useSidebar();
+  const { metrics } = useSelector((state) => state.dashboard);
 
-const navigationItems = [
+  const navigationItems = [
     { to: "/", icon: "LayoutDashboard", label: "Dashboard" },
-    { to: "/clients", icon: "Users", label: "Clients", badge: "12" },
-    { to: "/projects", icon: "FolderOpen", label: "Projects", badge: "8" },
-    { to: "/tasks", icon: "CheckSquare", label: "Tasks", badge: "24" },
-    { to: "/time-tracking", icon: "Timer", label: "Time Tracking", badge: "2" },
-    { to: "/invoices", icon: "FileText", label: "Invoices", badge: "5" }
+    { to: "/clients", icon: "Users", label: "Clients", badge: metrics.clientCount > 0 ? metrics.clientCount.toString() : "0" },
+    { to: "/projects", icon: "FolderOpen", label: "Projects", badge: metrics.projectCount > 0 ? metrics.projectCount.toString() : "0" },
+    { to: "/tasks", icon: "CheckSquare", label: "Tasks", badge: metrics.taskCount > 0 ? metrics.taskCount.toString() : "0" },
+    { to: "/time-tracking", icon: "Timer", label: "Time Tracking", badge: metrics.timeTrackingCount > 0 ? metrics.timeTrackingCount.toString() : "0" },
+    { to: "/invoices", icon: "FileText", label: "Invoices", badge: metrics.invoiceCount > 0 ? metrics.invoiceCount.toString() : "0" }
   ];
 
   // Desktop Sidebar - Static positioning
