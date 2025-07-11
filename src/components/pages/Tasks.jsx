@@ -346,12 +346,12 @@ const getStatusIcon = (status) => {
                             {task.priority}
                           </Badge>
                           
-                          <Badge 
+<Badge 
                             variant={getStatusVariant(task.status)}
                             className="flex items-center gap-1"
                           >
                             <ApperIcon name={getStatusIcon(task.status)} size={12} />
-                            {task.status.replace("-", " ")}
+                            {task.status ? task.status.replace("-", " ") : "unknown"}
                           </Badge>
                         </div>
 </div>
