@@ -119,8 +119,8 @@ const [tasks, setTasks] = useState([]);
     return currentTime - new Date(timer.startTime).getTime();
   };
 
-  const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
+const filteredTasks = tasks.filter(task => {
+    const matchesSearch = task.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     return matchesSearch && matchesPriority && matchesStatus;
@@ -334,7 +334,7 @@ const getStatusIcon = (status) => {
                             {task.title}
                           </h3>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Project ID: {task.projectId}
+Project ID: {task.project_id}
                           </p>
                         </div>
                         
@@ -360,11 +360,10 @@ const getStatusIcon = (status) => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                           <div className="flex items-center gap-1">
-                            <ApperIcon name="Calendar" size={14} />
-                            <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
+<ApperIcon name="Calendar" size={14} />
+                            <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>
                           </div>
-                          
-                          {new Date(task.dueDate) < new Date() && task.status !== "done" && (
+{new Date(task.due_date) < new Date() && task.status !== "done" && (
                             <Badge variant="danger" className="text-xs">
                               Overdue
                             </Badge>
@@ -487,18 +486,11 @@ const getStatusIcon = (status) => {
             try {
               setIsCreating(true);
               const newTask = await createTask({
-                ...taskFormData,
-                title: taskFormData.title.trim(),
+title: taskFormData.title.trim(),
                 description: taskFormData.description.trim(),
                 dueDate: taskFormData.dueDate,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                timeTracking: {
-                  totalTime: 0,
-                  activeTimer: null,
-                  timeLogs: []
-                }
-              });
+                projectId: taskFormData.projectId,
+});
               
               setTasks(prev => [...prev, newTask]);
               setShowTaskModal(false);

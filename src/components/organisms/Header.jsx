@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
+import { useSelector } from "react-redux";
 import Button from "@/components/atoms/Button";
 import ThemeToggle from "@/components/molecules/ThemeToggle";
 import ApperIcon from "@/components/ApperIcon";
 import { useSidebar } from "@/hooks/useSidebar";
+import { AuthContext } from "../../App";
 
 const Header = () => {
   const { toggleSidebar } = useSidebar();
+  const { logout } = useContext(AuthContext);
+  const { user } = useSelector((state) => state.user);
+  
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4">
       <div className="flex items-center justify-between">
@@ -34,9 +39,31 @@ const Header = () => {
             <ApperIcon name="Bell" size={18} className="text-gray-600 dark:text-gray-300" />
           </Button>
           
-<ThemeToggle />
+          <ThemeToggle />
+          
+          {user && (
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:block text-right">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  {user.emailAddress}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={logout}
+                className="flex items-center gap-2"
+              >
+                <ApperIcon name="LogOut" size={16} />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </div>
+          )}
         </div>
-</div>
+      </div>
     </header>
   );
 };

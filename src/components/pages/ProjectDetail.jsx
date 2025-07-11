@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
+import KanbanBoard from "@/components/organisms/KanbanBoard";
 import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import Card from "@/components/atoms/Card";
 import Empty from "@/components/ui/Empty";
 import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
+import Tasks from "@/components/pages/Tasks";
 import ProjectModal from "@/components/molecules/ProjectModal";
-import KanbanBoard from "@/components/organisms/KanbanBoard";
-import { getProjectById, updateProject, deleteProject } from "@/services/api/projectService";
-import { getAllClients } from "@/services/api/clientService";
-import { getAllTasks } from "@/services/api/taskService";
 import { getProjectTimeTracking } from "@/services/api/timeTrackingService";
+import { deleteProject, getProjectById, updateProject } from "@/services/api/projectService";
+import { getAllTasks } from "@/services/api/taskService";
+import { getAllClients } from "@/services/api/clientService";
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -50,12 +51,12 @@ const [projectData, clientsData, tasksData, timeTrackingData] = await Promise.al
 
       setProject(projectData);
       
-      // Find the client for this project
-      const projectClient = clientsData.find(c => c.Id === parseInt(projectData.clientId));
+// Find the client for this project
+      const projectClient = clientsData.find(c => c.Id === parseInt(projectData.client_id));
       setClient(projectClient);
       
 // Filter tasks for this project
-      const projectTasks = tasksData.filter(t => t.projectId === String(projectData.Id));
+      const projectTasks = tasksData.filter(t => t.project_id === String(projectData.Id));
       setTasks(projectTasks);
       setProjectTimeTracking(timeTrackingData);
       
@@ -135,17 +136,16 @@ const getTaskStatusVariant = (status) => {
     const completedTasks = tasks.filter(t => t.status === "done").length;
     return Math.round((completedTasks / tasks.length) * 100);
   };
-
-  const calculateTimeProgress = () => {
-    if (!project?.startDate || !project?.endDate) return 0;
-    const start = new Date(project.startDate);
-    const end = new Date(project.endDate);
+const calculateTimeProgress = () => {
+    if (!project?.start_date || !project?.end_date) return 0;
+    const start = new Date(project.start_date);
+    const end = new Date(project.end_date);
     const now = new Date();
     const totalDuration = end - start;
     const elapsed = now - start;
     return Math.max(0, Math.min(100, Math.round((elapsed / totalDuration) * 100)));
+return Math.max(0, Math.min(100, Math.round((elapsed / totalDuration) * 100)));
   };
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -161,9 +161,9 @@ const getTaskStatusVariant = (status) => {
     });
   };
 
-  const getDaysRemaining = () => {
-    if (!project?.endDate) return null;
-    const end = new Date(project.endDate);
+const getDaysRemaining = () => {
+    if (!project?.end_date) return null;
+    const end = new Date(project.end_date);
     const now = new Date();
     const diffTime = end - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -231,11 +231,11 @@ const getTaskStatusVariant = (status) => {
               <ApperIcon name="FolderOpen" size={18} className="text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                {project.name}
+<h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                {project.Name}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                {client?.name || `Client ID: ${project.clientId}`}
+<p className="text-gray-600 dark:text-gray-400">
+                {client?.Name || `Client ID: ${project.client_id}`}
               </p>
             </div>
           </div>
@@ -478,14 +478,14 @@ const getTaskStatusVariant = (status) => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Start Date
-                  </label>
-                  <p className="text-gray-900 dark:text-white">{formatDate(project.startDate)}</p>
+</label>
+                  <p className="text-gray-900 dark:text-white">{formatDate(project.start_date)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     End Date
-                  </label>
-                  <p className="text-gray-900 dark:text-white">{formatDate(project.endDate)}</p>
+</label>
+                  <p className="text-gray-900 dark:text-white">{formatDate(project.end_date)}</p>
                 </div>
               </div>
 
@@ -494,8 +494,8 @@ const getTaskStatusVariant = (status) => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Client
                   </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {client?.name || `Client ID: ${project.clientId}`}
+<p className="text-gray-900 dark:text-white">
+                    {client?.Name || `Client ID: ${project.client_id}`}
                   </p>
                 </div>
                 <div>
@@ -525,10 +525,10 @@ const getTaskStatusVariant = (status) => {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <div>
+<div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">Project Started</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {formatDate(project.startDate)}
+                    {formatDate(project.start_date)}
                   </p>
                 </div>
               </div>
@@ -553,10 +553,10 @@ const getTaskStatusVariant = (status) => {
                 <div className={`w-3 h-3 rounded-full ${
                   project.status === "completed" ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
                 }`}></div>
-                <div>
+<div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">Project End</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {formatDate(project.endDate)}
+                    {formatDate(project.end_date)}
                   </p>
                 </div>
               </div>
@@ -638,8 +638,8 @@ const getTaskStatusVariant = (status) => {
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {task.title}
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Due: {formatDate(task.dueDate)}
+<p className="text-xs text-gray-600 dark:text-gray-400">
+                        Due: {formatDate(task.due_date)}
                       </p>
                     </div>
                   </div>
@@ -693,9 +693,9 @@ const getTaskStatusVariant = (status) => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Delete Project
               </h3>
-            </div>
+</div>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete "{project.name}"? This action cannot be undone.
+              Are you sure you want to delete "{project.Name}"? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <Button

@@ -1,145 +1,320 @@
-import tasksData from "@/services/mockData/tasks.json";
-
-let tasks = [...tasksData];
-let nextTimeLogId = 100;
+const { ApperClient } = window.ApperSDK;
+const apperClient = new ApperClient({
+  apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+  apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+});
 
 export const getAllTasks = async () => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 200));
-  return [...tasks];
+  try {
+    const params = {
+      fields: [
+        { field: { Name: "Name" } },
+        { field: { Name: "title" } },
+        { field: { Name: "priority" } },
+        { field: { Name: "status" } },
+        { field: { Name: "due_date" } },
+        { field: { Name: "total_time" } },
+        { field: { Name: "active_timer" } },
+        { field: { Name: "time_tracking" } },
+        { field: { Name: "project_id" } },
+        { field: { Name: "Tags" } }
+      ],
+      orderBy: [
+        {
+          fieldName: "CreatedOn",
+          sorttype: "DESC"
+        }
+      ],
+      pagingInfo: {
+        limit: 100,
+        offset: 0
+      }
+    };
+
+    const response = await apperClient.fetchRecords("task", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    throw new Error(`Failed to fetch tasks: ${error.message}`);
+  }
 };
 
 export const getTaskById = async (id) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 150));
-  const task = tasks.find(t => t.Id === parseInt(id));
-  if (!task) {
-    throw new Error("Task not found");
+  try {
+    const params = {
+      fields: [
+        { field: { Name: "Name" } },
+        { field: { Name: "title" } },
+        { field: { Name: "priority" } },
+        { field: { Name: "status" } },
+        { field: { Name: "due_date" } },
+        { field: { Name: "total_time" } },
+        { field: { Name: "active_timer" } },
+        { field: { Name: "time_tracking" } },
+        { field: { Name: "project_id" } },
+        { field: { Name: "Tags" } }
+      ]
+    };
+
+    const response = await apperClient.getRecordById("task", parseInt(id), params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (!response.data) {
+      throw new Error("Task not found");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching task:", error);
+    throw new Error(`Failed to fetch task: ${error.message}`);
   }
-  return { ...task };
 };
 
 export const createTask = async (taskData) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const newTask = {
-    ...taskData,
-    Id: Math.max(...tasks.map(t => t.Id)) + 1
-  };
-  
-  tasks.push(newTask);
-  return { ...newTask };
+  try {
+    const params = {
+      records: [
+        {
+          Name: taskData.name || taskData.title,
+          title: taskData.title,
+          priority: taskData.priority,
+          status: taskData.status,
+          due_date: taskData.dueDate,
+          total_time: 0,
+          active_timer: "",
+          time_tracking: "",
+          project_id: parseInt(taskData.projectId) || 0,
+          Tags: taskData.tags || ""
+        }
+      ]
+    };
+
+    const response = await apperClient.createRecord("task", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successfulRecords = response.results.filter(result => result.success);
+      const failedRecords = response.results.filter(result => !result.success);
+      
+      if (failedRecords.length > 0) {
+        console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+        throw new Error(failedRecords[0].message || "Failed to create task");
+      }
+      
+      return successfulRecords[0].data;
+    }
+  } catch (error) {
+    console.error("Error creating task:", error);
+    throw new Error(`Failed to create task: ${error.message}`);
+  }
 };
 
 export const updateTask = async (id, taskData) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 250));
-  
-  const index = tasks.findIndex(t => t.Id === parseInt(id));
-  if (index === -1) {
-    throw new Error("Task not found");
+  try {
+    const params = {
+      records: [
+        {
+          Id: parseInt(id),
+          Name: taskData.name || taskData.title,
+          title: taskData.title,
+          priority: taskData.priority,
+          status: taskData.status,
+          due_date: taskData.dueDate,
+          total_time: taskData.total_time || 0,
+          active_timer: taskData.active_timer || "",
+          time_tracking: taskData.time_tracking || "",
+          project_id: parseInt(taskData.projectId) || 0,
+          Tags: taskData.tags || ""
+        }
+      ]
+    };
+
+    const response = await apperClient.updateRecord("task", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successfulUpdates = response.results.filter(result => result.success);
+      const failedUpdates = response.results.filter(result => !result.success);
+      
+      if (failedUpdates.length > 0) {
+        console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+        throw new Error(failedUpdates[0].message || "Failed to update task");
+      }
+      
+      return successfulUpdates[0].data;
+    }
+  } catch (error) {
+    console.error("Error updating task:", error);
+    throw new Error(`Failed to update task: ${error.message}`);
   }
-  
-  tasks[index] = { ...tasks[index], ...taskData };
-  return { ...tasks[index] };
 };
 
 export const updateTaskStatus = async (id, status) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 200));
-  
-  const index = tasks.findIndex(t => t.Id === parseInt(id));
-  if (index === -1) {
-    throw new Error("Task not found");
+  try {
+    const params = {
+      records: [
+        {
+          Id: parseInt(id),
+          status: status
+        }
+      ]
+    };
+
+    const response = await apperClient.updateRecord("task", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successfulUpdates = response.results.filter(result => result.success);
+      const failedUpdates = response.results.filter(result => !result.success);
+      
+      if (failedUpdates.length > 0) {
+        console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+        throw new Error(failedUpdates[0].message || "Failed to update task status");
+      }
+      
+      return successfulUpdates[0].data;
+    }
+  } catch (error) {
+    console.error("Error updating task status:", error);
+    throw new Error(`Failed to update task status: ${error.message}`);
   }
-  
-  tasks[index] = { ...tasks[index], status };
-  return { ...tasks[index] };
 };
 
 export const deleteTask = async (id) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 200));
-  
-  const index = tasks.findIndex(t => t.Id === parseInt(id));
-  if (index === -1) {
-    throw new Error("Task not found");
+  try {
+    const params = {
+      RecordIds: [parseInt(id)]
+    };
+
+    const response = await apperClient.deleteRecord("task", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const failedDeletions = response.results.filter(result => !result.success);
+      
+      if (failedDeletions.length > 0) {
+        console.error(`Failed to delete ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
+        throw new Error(failedDeletions[0].message || "Failed to delete task");
+      }
+      
+      return true;
+    }
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    throw new Error(`Failed to delete task: ${error.message}`);
   }
-  
-  tasks.splice(index, 1);
-  return true;
 };
 
 export const startTaskTimer = async (id) => {
-  await new Promise(resolve => setTimeout(resolve, 200));
-  
-  const index = tasks.findIndex(t => t.Id === parseInt(id));
-  if (index === -1) {
-    throw new Error("Task not found");
-  }
-
-  const now = new Date().toISOString();
-  
-  if (!tasks[index].timeTracking) {
-    tasks[index].timeTracking = {
-      totalTime: 0,
-      activeTimer: null,
-      timeLogs: []
+  try {
+    const now = new Date().toISOString();
+    const params = {
+      records: [
+        {
+          Id: parseInt(id),
+          active_timer: now
+        }
+      ]
     };
+
+    const response = await apperClient.updateRecord("task", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successfulUpdates = response.results.filter(result => result.success);
+      const failedUpdates = response.results.filter(result => !result.success);
+      
+      if (failedUpdates.length > 0) {
+        console.error(`Failed to start timer for ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+        throw new Error(failedUpdates[0].message || "Failed to start timer");
+      }
+      
+      return {
+        Id: parseInt(id),
+        startTime: now
+      };
+    }
+  } catch (error) {
+    console.error("Error starting timer:", error);
+    throw new Error(`Failed to start timer: ${error.message}`);
   }
-
-  if (tasks[index].timeTracking.activeTimer) {
-    throw new Error("Timer already running for this task");
-  }
-
-  tasks[index].timeTracking.activeTimer = {
-    Id: tasks[index].Id,
-    startTime: now
-  };
-
-  return { ...tasks[index].timeTracking.activeTimer };
 };
 
 export const stopTaskTimer = async (id) => {
-  await new Promise(resolve => setTimeout(resolve, 200));
-  
-  const index = tasks.findIndex(t => t.Id === parseInt(id));
-  if (index === -1) {
-    throw new Error("Task not found");
+  try {
+    const params = {
+      records: [
+        {
+          Id: parseInt(id),
+          active_timer: ""
+        }
+      ]
+    };
+
+    const response = await apperClient.updateRecord("task", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successfulUpdates = response.results.filter(result => result.success);
+      const failedUpdates = response.results.filter(result => !result.success);
+      
+      if (failedUpdates.length > 0) {
+        console.error(`Failed to stop timer for ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+        throw new Error(failedUpdates[0].message || "Failed to stop timer");
+      }
+      
+      return {
+        Id: parseInt(id),
+        endTime: new Date().toISOString()
+      };
+    }
+  } catch (error) {
+    console.error("Error stopping timer:", error);
+    throw new Error(`Failed to stop timer: ${error.message}`);
   }
-
-  if (!tasks[index].timeTracking?.activeTimer) {
-    throw new Error("No active timer for this task");
-  }
-
-  const now = new Date().toISOString();
-  const startTime = new Date(tasks[index].timeTracking.activeTimer.startTime);
-  const endTime = new Date(now);
-  const duration = endTime.getTime() - startTime.getTime();
-
-  const timeLog = {
-    Id: nextTimeLogId++,
-    startTime: tasks[index].timeTracking.activeTimer.startTime,
-    endTime: now,
-    duration: duration,
-    date: startTime.toISOString().split('T')[0]
-  };
-
-  tasks[index].timeTracking.timeLogs.push(timeLog);
-  tasks[index].timeTracking.totalTime += duration;
-  tasks[index].timeTracking.activeTimer = null;
-
-  return { ...timeLog };
 };
 
 export const getTaskTimeLogs = async (id) => {
-  await new Promise(resolve => setTimeout(resolve, 150));
-  
-  const task = tasks.find(t => t.Id === parseInt(id));
-  if (!task) {
-    throw new Error("Task not found");
+  try {
+    const task = await getTaskById(id);
+    const timeTracking = task.time_tracking ? JSON.parse(task.time_tracking) : null;
+    return timeTracking?.timeLogs || [];
+  } catch (error) {
+    console.error("Error fetching time logs:", error);
+    throw new Error(`Failed to fetch time logs: ${error.message}`);
   }
-
-  return task.timeTracking?.timeLogs || [];
 };

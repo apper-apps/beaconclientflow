@@ -45,29 +45,34 @@ export const getProjectTimeTracking = async (projectId) => {
   await new Promise(resolve => setTimeout(resolve, 200));
   
   try {
-    const tasks = await getAllTasks();
-    const projectTasks = tasks.filter(t => t.projectId === String(projectId));
+const tasks = await getAllTasks();
+    const projectTasks = tasks.filter(t => t.project_id === String(projectId));
     
     let totalTime = 0;
     let activeTimers = 0;
     let totalEntries = 0;
     const timeLogs = [];
 
-    projectTasks.forEach(task => {
-      if (task.timeTracking) {
-        totalTime += task.timeTracking.totalTime || 0;
-        
-        if (task.timeTracking.activeTimer) {
-          activeTimers++;
-        }
-        
-        if (task.timeTracking.timeLogs) {
-          totalEntries += task.timeTracking.timeLogs.length;
-          timeLogs.push(...task.timeTracking.timeLogs.map(log => ({
-            ...log,
-            taskId: task.Id,
-            taskTitle: task.title
-          })));
+projectTasks.forEach(task => {
+      totalTime += task.total_time || 0;
+      
+      if (task.active_timer) {
+        activeTimers++;
+      }
+      
+      if (task.time_tracking) {
+        try {
+          const timeTrackingData = JSON.parse(task.time_tracking);
+          if (timeTrackingData.timeLogs) {
+            totalEntries += timeTrackingData.timeLogs.length;
+            timeLogs.push(...timeTrackingData.timeLogs.map(log => ({
+              ...log,
+              taskId: task.Id,
+              taskTitle: task.title
+            })));
+          }
+        } catch (e) {
+          // Handle invalid JSON
         }
       }
     });
@@ -99,28 +104,33 @@ export const getAllTimeTracking = async () => {
       taskBreakdown: []
     };
 
-    tasks.forEach(task => {
-      if (task.timeTracking) {
-        summary.totalTime += task.timeTracking.totalTime || 0;
-        
-        if (task.timeTracking.activeTimer) {
-          summary.activeTimers++;
+tasks.forEach(task => {
+      summary.totalTime += task.total_time || 0;
+      
+      if (task.active_timer) {
+        summary.activeTimers++;
+      }
+      
+      if (task.time_tracking) {
+        try {
+          const timeTrackingData = JSON.parse(task.time_tracking);
+          if (timeTrackingData.timeLogs) {
+            summary.totalEntries += timeTrackingData.timeLogs.length;
+          }
+        } catch (e) {
+          // Handle invalid JSON
         }
-        
-        if (task.timeTracking.timeLogs) {
-          summary.totalEntries += task.timeTracking.timeLogs.length;
-        }
+      }
 
-        if (task.timeTracking.totalTime > 0 || task.timeTracking.activeTimer) {
-          summary.taskBreakdown.push({
-            taskId: task.Id,
-            taskTitle: task.title,
-            projectId: task.projectId,
-            totalTime: task.timeTracking.totalTime || 0,
-            hasActiveTimer: !!task.timeTracking.activeTimer,
-            entryCount: task.timeTracking.timeLogs?.length || 0
-          });
-        }
+      if ((task.total_time && task.total_time > 0) || task.active_timer) {
+        summary.taskBreakdown.push({
+          taskId: task.Id,
+          taskTitle: task.title,
+          projectId: task.project_id,
+          totalTime: task.total_time || 0,
+          hasActiveTimer: !!task.active_timer,
+          entryCount: 0 // Will be calculated from time_tracking field
+        });
       }
     });
 

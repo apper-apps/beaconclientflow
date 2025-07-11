@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import Modal from "@/components/atoms/Modal";
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
-import Card from "@/components/atoms/Card";
 import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
+import Card from "@/components/atoms/Card";
+import Input from "@/components/atoms/Input";
+import Modal from "@/components/atoms/Modal";
 import { getAllProjects } from "@/services/api/projectService";
 
 const InvoiceModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
@@ -189,197 +189,141 @@ try {
 
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={initialData ? "Edit Invoice" : "Create New Invoice"}
-      size="xl"
-    >
-      <form onSubmit={handleSubmit} className="space-y-6">
+    isOpen={isOpen}
+    onClose={onClose}
+    title={initialData ? "Edit Invoice" : "Create New Invoice"}
+    size="xl">
+    <form onSubmit={handleSubmit} className="space-y-6">
         {/* Project Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Project *
-          </label>
-          <select
-            name="projectId"
-            value={formData.projectId}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-            disabled={loadingProjects}
-          >
-            <option value="">Select a project</option>
-            {projects.map(project => (
-              <option key={project.Id} value={project.Id}>
-                {project.name} - Client ID: {project.clientId}
-              </option>
-            ))}
-          </select>
-          {errors.projectId && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.projectId}</p>
-          )}
+            <label
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project *
+                          </label>
+            <select
+                name="projectId"
+                value={formData.projectId}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                disabled={loadingProjects}>
+                <option value="">Select a project</option>
+                <option key={project.Id} value={project.Id}>
+                    {project.Name}- Client ID: {project.client_id}
+                </option>))
+                          </select>
+            {errors.projectId && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.projectId}</p>}
         </div>
-
         {/* Due Date */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Due Date *
-          </label>
-          <Input
-            type="date"
-            name="dueDate"
-            value={formData.dueDate}
-            onChange={handleInputChange}
-            className="w-full"
-          />
-          {errors.dueDate && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.dueDate}</p>
-          )}
+            <label
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Due Date *
+                          </label>
+            <Input
+                type="date"
+                name="dueDate"
+                value={formData.dueDate}
+                onChange={handleInputChange}
+                className="w-full" />
+            {errors.dueDate && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.dueDate}</p>}
         </div>
-
         {/* Status */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Status
-          </label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="draft">Draft</option>
-            <option value="sent">Sent</option>
-            <option value="paid">Paid</option>
-            <option value="overdue">Overdue</option>
-          </select>
-</div>
-
+            <label
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status
+                          </label>
+            <select
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+            </select>
+        </div>
         {/* Payment Date - Only show if status is paid */}
-        {formData.status === 'paid' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Payment Date
-            </label>
+        {formData.status === "paid" && <div>
+            <label
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Payment Date
+                            </label>
             <Input
-              type="date"
-              name="paymentDate"
-              value={formData.paymentDate}
-              onChange={handleInputChange}
-              className="w-full"
-              max={new Date().toISOString().split('T')[0]}
-            />
-          </div>
-        )}
-
+                type="date"
+                name="paymentDate"
+                value={formData.paymentDate}
+                onChange={handleInputChange}
+                className="w-full"
+                max={new Date().toISOString().split("T")[0]} />
+        </div>}
         {/* Line Items */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Line Items *
-            </label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addLineItem}
-            >
-              <ApperIcon name="Plus" size={14} className="mr-2" />
-              Add Item
-            </Button>
-          </div>
-          
-          <div className="space-y-3">
-            {formData.lineItems.map((item, index) => (
-              <Card key={index} className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="Item description..."
-                      value={item.description}
-                      onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
-                      className="mb-2"
-                    />
-                    {errors[`lineItem_${index}_description`] && (
-                      <p className="text-sm text-red-600 dark:text-red-400">{errors[`lineItem_${index}_description`]}</p>
-                    )}
-                  </div>
-                  <div className="w-32">
-                    <Input
-                      type="number"
-                      placeholder="Amount"
-                      value={item.amount}
-                      onChange={(e) => handleLineItemChange(index, 'amount', e.target.value)}
-                      min="0"
-                      step="0.01"
-                      className="mb-2"
-                    />
-                    {errors[`lineItem_${index}_amount`] && (
-                      <p className="text-sm text-red-600 dark:text-red-400">{errors[`lineItem_${index}_amount`]}</p>
-                    )}
-                  </div>
-                  {formData.lineItems.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeLineItem(index)}
-                      className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                    >
-                      <ApperIcon name="Trash2" size={16} />
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-          
-          {errors.lineItems && (
-            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.lineItems}</p>
-          )}
+            <div className="flex items-center justify-between mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Line Items *
+                                </label>
+                <Button type="button" variant="outline" size="sm" onClick={addLineItem}>
+                    <ApperIcon name="Plus" size={14} className="mr-2" />Add Item
+                                </Button>
+            </div>
+            <div className="space-y-3">
+                {formData.lineItems.map((item, index) => <Card key={index} className="p-4">
+                    <div className="flex items-start gap-3">
+                        <div className="flex-1">
+                            <Input
+                                placeholder="Item description..."
+                                value={item.description}
+                                onChange={e => handleLineItemChange(index, "description", e.target.value)}
+                                className="mb-2" />
+                            {errors[`lineItem_${index}_description`] && <p className="text-sm text-red-600 dark:text-red-400">{errors[`lineItem_${index}_description`]}</p>}
+                        </div>
+                        <div className="w-32">
+                            <Input
+                                type="number"
+                                placeholder="Amount"
+                                value={item.amount}
+                                onChange={e => handleLineItemChange(index, "amount", e.target.value)}
+                                min="0"
+                                step="0.01"
+                                className="mb-2" />
+                            {errors[`lineItem_${index}_amount`] && <p className="text-sm text-red-600 dark:text-red-400">{errors[`lineItem_${index}_amount`]}</p>}
+                        </div>
+                        {formData.lineItems.length > 1 && <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeLineItem(index)}
+                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                            <ApperIcon name="Trash2" size={16} />
+                        </Button>}
+                    </div>
+                </Card>)}
+            </div>
+            {errors.lineItems && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.lineItems}</p>}
         </div>
-
         {/* Total */}
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-medium text-gray-900 dark:text-white">
-              Total Amount:
-            </span>
-            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-              ${calculateTotal().toLocaleString()}
-            </span>
-          </div>
+            <div className="flex justify-between items-center">
+                <span className="text-lg font-medium text-gray-900 dark:text-white">Total Amount:
+                                </span>
+                <span className="text-2xl font-bold text-green-600 dark:text-green-400">${calculateTotal().toLocaleString()}
+                </span>
+            </div>
         </div>
-
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <ApperIcon name="Loader2" size={16} className="mr-2 animate-spin" />
-                {initialData ? "Updating..." : "Creating..."}
-              </>
-            ) : (
-              <>
-                <ApperIcon name="Save" size={16} className="mr-2" />
-                {initialData ? "Update Invoice" : "Create Invoice"}
-              </>
-            )}
-          </Button>
+        <div
+            className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel
+                          </Button>
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+                {isSubmitting ? <>
+                    <ApperIcon name="Loader2" size={16} className="mr-2 animate-spin" />
+                    {initialData ? "Updating..." : "Creating..."}
+                </> : <>
+                    <ApperIcon name="Save" size={16} className="mr-2" />
+                    {initialData ? "Update Invoice" : "Create Invoice"}
+                </>}
+            </Button>
         </div>
-      </form>
-    </Modal>
+    </form>
+</Modal>
   );
 };
 

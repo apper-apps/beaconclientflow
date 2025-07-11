@@ -1,58 +1,189 @@
-import projectsData from "@/services/mockData/projects.json";
-
-let projects = [...projectsData];
+const { ApperClient } = window.ApperSDK;
+const apperClient = new ApperClient({
+  apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+  apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+});
 
 export const getAllProjects = async () => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 250));
-  return [...projects];
+  try {
+    const params = {
+      fields: [
+        { field: { Name: "Name" } },
+        { field: { Name: "status" } },
+        { field: { Name: "budget" } },
+        { field: { Name: "start_date" } },
+        { field: { Name: "end_date" } },
+        { field: { Name: "description" } },
+        { field: { Name: "client_id" } },
+        { field: { Name: "Tags" } }
+      ],
+      orderBy: [
+        {
+          fieldName: "CreatedOn",
+          sorttype: "DESC"
+        }
+      ],
+      pagingInfo: {
+        limit: 100,
+        offset: 0
+      }
+    };
+
+    const response = await apperClient.fetchRecords("project", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    throw new Error(`Failed to fetch projects: ${error.message}`);
+  }
 };
 
 export const getProjectById = async (id) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 150));
-  const project = projects.find(p => p.Id === parseInt(id));
-  if (!project) {
-    throw new Error("Project not found");
+  try {
+    const params = {
+      fields: [
+        { field: { Name: "Name" } },
+        { field: { Name: "status" } },
+        { field: { Name: "budget" } },
+        { field: { Name: "start_date" } },
+        { field: { Name: "end_date" } },
+        { field: { Name: "description" } },
+        { field: { Name: "client_id" } },
+        { field: { Name: "Tags" } }
+      ]
+    };
+
+    const response = await apperClient.getRecordById("project", parseInt(id), params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (!response.data) {
+      throw new Error("Project not found");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching project:", error);
+    throw new Error(`Failed to fetch project: ${error.message}`);
   }
-  return { ...project };
 };
 
 export const createProject = async (projectData) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const newProject = {
-    ...projectData,
-    Id: Math.max(...projects.map(p => p.Id)) + 1
-  };
-  
-  projects.push(newProject);
-  return { ...newProject };
+  try {
+    const params = {
+      records: [
+        {
+          Name: projectData.name,
+          status: projectData.status,
+          budget: parseFloat(projectData.budget) || 0,
+          start_date: projectData.startDate,
+          end_date: projectData.endDate,
+          description: projectData.description || "",
+          client_id: parseInt(projectData.clientId),
+          Tags: projectData.tags || ""
+        }
+      ]
+    };
+
+    const response = await apperClient.createRecord("project", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successfulRecords = response.results.filter(result => result.success);
+      const failedRecords = response.results.filter(result => !result.success);
+      
+      if (failedRecords.length > 0) {
+        console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+        throw new Error(failedRecords[0].message || "Failed to create project");
+      }
+      
+      return successfulRecords[0].data;
+    }
+  } catch (error) {
+    console.error("Error creating project:", error);
+    throw new Error(`Failed to create project: ${error.message}`);
+  }
 };
 
 export const updateProject = async (id, projectData) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 250));
-  
-  const index = projects.findIndex(p => p.Id === parseInt(id));
-  if (index === -1) {
-    throw new Error("Project not found");
+  try {
+    const params = {
+      records: [
+        {
+          Id: parseInt(id),
+          Name: projectData.name,
+          status: projectData.status,
+          budget: parseFloat(projectData.budget) || 0,
+          start_date: projectData.startDate,
+          end_date: projectData.endDate,
+          description: projectData.description || "",
+          client_id: parseInt(projectData.clientId),
+          Tags: projectData.tags || ""
+        }
+      ]
+    };
+
+    const response = await apperClient.updateRecord("project", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successfulUpdates = response.results.filter(result => result.success);
+      const failedUpdates = response.results.filter(result => !result.success);
+      
+      if (failedUpdates.length > 0) {
+        console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+        throw new Error(failedUpdates[0].message || "Failed to update project");
+      }
+      
+      return successfulUpdates[0].data;
+    }
+  } catch (error) {
+    console.error("Error updating project:", error);
+    throw new Error(`Failed to update project: ${error.message}`);
   }
-  
-  projects[index] = { ...projects[index], ...projectData };
-  return { ...projects[index] };
 };
 
 export const deleteProject = async (id) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 200));
-  
-  const index = projects.findIndex(p => p.Id === parseInt(id));
-  if (index === -1) {
-    throw new Error("Project not found");
+  try {
+    const params = {
+      RecordIds: [parseInt(id)]
+    };
+
+    const response = await apperClient.deleteRecord("project", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const failedDeletions = response.results.filter(result => !result.success);
+      
+      if (failedDeletions.length > 0) {
+        console.error(`Failed to delete ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
+        throw new Error(failedDeletions[0].message || "Failed to delete project");
+      }
+      
+      return true;
+    }
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    throw new Error(`Failed to delete project: ${error.message}`);
   }
-  
-  projects.splice(index, 1);
-  return true;
 };

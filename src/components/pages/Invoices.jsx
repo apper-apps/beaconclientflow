@@ -12,7 +12,7 @@ import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import InvoiceModal from "@/components/molecules/InvoiceModal";
 import SearchBar from "@/components/molecules/SearchBar";
-import { createInvoice, getAllInvoices, markInvoiceAsSent, markInvoiceAsPaid } from "@/services/api/invoiceService";
+import { createInvoice, getAllInvoices, markInvoiceAsPaid, markInvoiceAsSent } from "@/services/api/invoiceService";
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
@@ -153,7 +153,14 @@ const handleNewInvoiceClick = () => {
         await loadInvoices();
         toast.success("Invoice updated successfully");
       } else {
-        await createInvoice(invoiceData);
+await createInvoice({
+          project_id: invoiceData.projectId,
+          client_id: invoiceData.clientId,
+          amount: invoiceData.amount,
+          status: invoiceData.status,
+          due_date: invoiceData.dueDate,
+          payment_date: invoiceData.paymentDate
+        });
         await loadInvoices();
         toast.success("Invoice created successfully");
       }
@@ -292,12 +299,12 @@ return (
                       <ApperIcon name={getStatusIcon(invoice.status)} size={12} />
                       {invoice.status}
                     </Badge>
-                  </div>
+</div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Client ID: {invoice.clientId}
+                    Client ID: {invoice.client_id}
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Project ID: {invoice.projectId}
+                    Project ID: {invoice.project_id}
                   </p>
                 </div>
               </div>
@@ -310,28 +317,28 @@ return (
                   </span>
                 </div>
                 
-                <div className="flex items-center justify-between text-sm">
+<div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600 dark:text-gray-400">Due Date:</span>
                   <span className={`font-medium ${
-                    new Date(invoice.dueDate) < new Date() && invoice.status !== "paid"
+                    new Date(invoice.due_date) < new Date() && invoice.status !== "paid"
                       ? "text-red-600 dark:text-red-400"
                       : "text-gray-900 dark:text-white"
                   }`}>
-                    {new Date(invoice.dueDate).toLocaleDateString()}
+                    {new Date(invoice.due_date).toLocaleDateString()}
                   </span>
                 </div>
                 
-                {new Date(invoice.dueDate) < new Date() && invoice.status !== "paid" && (
+                {new Date(invoice.due_date) < new Date() && invoice.status !== "paid" && (
                   <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                     <ApperIcon name="AlertTriangle" size={14} className="text-red-600 dark:text-red-400" />
-                    <span className="text-xs text-red-600 dark:text-red-400 font-medium">
-                      {Math.floor((new Date() - new Date(invoice.dueDate)) / (1000 * 60 * 60 * 24))} days overdue
+                    <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                      {Math.floor((new Date() - new Date(invoice.due_date)) / (1000 * 60 * 60 * 24))} days overdue
                     </span>
                   </div>
                 )}
               </div>
               
-<div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="flex items-center gap-2">
                   <Button 
                     variant="outline" 

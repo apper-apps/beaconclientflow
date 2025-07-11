@@ -79,11 +79,11 @@ const handleProjectSubmit = async (projectData) => {
   };
 
 const getClientName = (clientId) => {
-    const client = clients.find(c => c.Id === clientId);
-    return client ? client.name : `Client ID: ${clientId}`;
+    const client = clients.find(c => c.Id === parseInt(clientId));
+    return client ? client.Name : `Client ID: ${clientId}`;
   };
 const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const matchesSearch = project.Name?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
     const matchesStatus = statusFilter === "all" || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -218,11 +218,11 @@ actionLabel="Create Project"
             <Card hover className="p-6 h-full">
               <div className="flex items-start justify-between mb-4">
 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 dark:text-white truncate mb-1">
-                    {project.name || 'Unnamed Project'}
+<h3 className="font-semibold text-gray-900 dark:text-white truncate mb-1">
+                    {project.Name || 'Unnamed Project'}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {getClientName(project.clientId)}
+                    {getClientName(project.client_id)}
                   </p>
                 </div>
                 
@@ -241,16 +241,16 @@ actionLabel="Create Project"
                 </div>
                 
 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Start Date:</span>
+<span className="text-gray-600 dark:text-gray-400">Start Date:</span>
                   <span className="text-gray-900 dark:text-white">
-                    {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Not set'}
+                    {project.start_date ? new Date(project.start_date).toLocaleDateString() : 'Not set'}
                   </span>
                 </div>
                 
 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">End Date:</span>
+<span className="text-gray-600 dark:text-gray-400">End Date:</span>
                   <span className="text-gray-900 dark:text-white">
-                    {project.endDate ? new Date(project.endDate).toLocaleDateString() : 'Not set'}
+                    {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'Not set'}
                   </span>
                 </div>
                 

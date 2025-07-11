@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import Card from "@/components/atoms/Card";
-import Badge from "@/components/atoms/Badge";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
-import ApperIcon from "@/components/ApperIcon";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import Projects from "@/components/pages/Projects";
 import ClientModal from "@/components/molecules/ClientModal";
-import { getClientById } from "@/services/api/clientService";
 import { getAllProjects } from "@/services/api/projectService";
+import { getClientById } from "@/services/api/clientService";
 
 const ClientDetail = () => {
   const { id } = useParams();
@@ -34,9 +35,9 @@ const ClientDetail = () => {
       
       setClient(clientData);
       
-      // Filter projects for this client
+// Filter projects for this client
       const clientProjects = allProjects.filter(project => 
-        parseInt(project.clientId) === parseInt(id)
+        parseInt(project.client_id) === parseInt(id)
       );
       setProjects(clientProjects);
     } catch (err) {
@@ -134,7 +135,7 @@ const ClientDetail = () => {
               <ApperIcon name="User" size={18} className="text-white" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-              {client.name}
+{client.Name}
             </h1>
             <Badge variant={client.status === "active" ? "success" : "secondary"}>
               {client.status}
@@ -167,12 +168,12 @@ const ClientDetail = () => {
             
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-semibold shadow-lg">
-                  {client.name.charAt(0).toUpperCase()}
+<div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-semibold shadow-lg">
+                  {client.Name?.charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">
-                    {client.name}
+                    {client.Name}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {client.company}
@@ -188,7 +189,7 @@ const ClientDetail = () => {
                 
                 <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                   <ApperIcon name="Calendar" size={16} />
-                  <span>Client since {new Date(client.createdAt).toLocaleDateString()}</span>
+<span>Client since {new Date(client.createdAt || client.CreatedOn).toLocaleDateString()}</span>
                 </div>
               </div>
               
@@ -302,25 +303,24 @@ const ClientDetail = () => {
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                   className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
-                  <div className="flex items-center justify-between">
+<div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
                         <ApperIcon name={getStatusIcon(project.status)} size={14} className="text-white" />
                       </div>
                       <div>
                         <h3 className="font-medium text-gray-900 dark:text-white">
-                          {project.name}
+                          {project.Name}
                         </h3>
                         <div className="flex items-center gap-4 mt-1">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
                             ${project.budget?.toLocaleString() || 0}
                           </span>
                           <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {new Date(project.startDate).toLocaleDateString()} - {new Date(project.endDate).toLocaleDateString()}
+                            {new Date(project.start_date).toLocaleDateString()} - {new Date(project.end_date).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
-                    </div>
                     <Badge variant={getStatusVariant(project.status)}>
                       {project.status}
                     </Badge>
