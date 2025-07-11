@@ -321,6 +321,7 @@ const ClientDetail = () => {
                           </span>
                         </div>
                       </div>
+                    </div>
                     <Badge variant={getStatusVariant(project.status)}>
                       {project.status}
                     </Badge>
