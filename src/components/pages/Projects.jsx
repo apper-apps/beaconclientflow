@@ -219,7 +219,7 @@ actionLabel="Create Project"
               <div className="flex items-start justify-between mb-4">
 <div className="flex-1 min-w-0">
 <h3 className="font-semibold text-gray-900 dark:text-white truncate mb-1">
-                    {project.Name || 'Unnamed Project'}
+                    {project.Name || project.name || 'Unnamed Project'}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {getClientName(project.client_id)}

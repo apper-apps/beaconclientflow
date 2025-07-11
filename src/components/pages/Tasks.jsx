@@ -332,12 +332,11 @@ const getStatusIcon = (status) => {
                             task.status === "done" ? "line-through opacity-60" : ""
                           }`}>
                             {task.title}
-                          </h3>
+</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-Project ID: {task.project_id}
+                            Project: {task.project_id?.Name || task.project_id || 'Unknown'}
                           </p>
                         </div>
-                        
                         <div className="flex items-center gap-2">
                           <Badge 
                             variant={getPriorityVariant(task.priority)} 

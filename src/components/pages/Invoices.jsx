@@ -301,10 +301,10 @@ return (
                     </Badge>
 </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Client ID: {invoice.client_id}
+                    Client: {invoice.client_id?.Name || invoice.client_id || 'Unknown'}
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Project ID: {invoice.project_id}
+                    Project: {invoice.project_id?.Name || invoice.project_id || 'Unknown'}
                   </p>
                 </div>
               </div>
