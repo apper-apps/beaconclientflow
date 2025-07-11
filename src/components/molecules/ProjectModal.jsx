@@ -162,9 +162,9 @@ const getClientName = (clientId) => {
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      size="lg"
+size="lg"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar px-1">
         {/* Project Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
