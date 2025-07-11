@@ -142,9 +142,8 @@ const calculateTimeProgress = () => {
     const end = new Date(project.end_date);
     const now = new Date();
     const totalDuration = end - start;
-    const elapsed = now - start;
+const elapsed = now - start;
     return Math.max(0, Math.min(100, Math.round((elapsed / totalDuration) * 100)));
-return Math.max(0, Math.min(100, Math.round((elapsed / totalDuration) * 100)));
   };
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -233,8 +232,8 @@ const getDaysRemaining = () => {
             <div>
 <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                 {project.Name}
-              </h1>
-<p className="text-gray-600 dark:text-gray-400">
+</h1>
+              <p className="text-gray-600 dark:text-gray-400">
                 {client?.Name || `Client ID: ${project.client_id}`}
               </p>
             </div>
@@ -493,8 +492,8 @@ const getDaysRemaining = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Client
-                  </label>
-<p className="text-gray-900 dark:text-white">
+</label>
+                  <p className="text-gray-900 dark:text-white">
                     {client?.Name || `Client ID: ${project.client_id}`}
                   </p>
                 </div>

@@ -263,8 +263,8 @@ useEffect(() => {
                                   </Button>
                                 </div>
 
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
-Project: {task.project_id}
+<div className="text-xs text-gray-500 dark:text-gray-400">
+                                  Project: {task.project_id?.Name || task.project_id}
                                 </div>
                               </div>
                             </Card>
