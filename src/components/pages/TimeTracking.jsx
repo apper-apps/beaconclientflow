@@ -35,11 +35,11 @@ const TimeTracking = () => {
 
   const formatDuration = (milliseconds) => {
     if (!milliseconds || milliseconds === 0) return "0h 0m";
-    
+
     const totalSeconds = Math.floor(milliseconds / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }
@@ -61,7 +61,7 @@ const TimeTracking = () => {
         description="Start tracking time on your tasks to see detailed reports here"
         icon="Timer"
         actionLabel="Go to Tasks"
-        onAction={() => window.location.href = "/tasks"}
+        onAction={() => (window.location.href = "/tasks")}
       />
     );
   }
@@ -88,7 +88,7 @@ const TimeTracking = () => {
             Track and analyze time spent on tasks and projects
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Button variant="outline">
             <ApperIcon name="Download" size={16} className="mr-2" />
@@ -111,10 +111,16 @@ const TimeTracking = () => {
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                <ApperIcon name="Clock" size={20} className="text-green-600 dark:text-green-400" />
+                <ApperIcon
+                  name="Clock"
+                  size={20}
+                  className="text-green-600 dark:text-green-400"
+                />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Total Time</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  Total Time
+                </h3>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {formatDuration(timeData.totalTime)}
                 </p>
@@ -131,10 +137,16 @@ const TimeTracking = () => {
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                <ApperIcon name="Play" size={20} className="text-blue-600 dark:text-blue-400" />
+                <ApperIcon
+                  name="Play"
+                  size={20}
+                  className="text-blue-600 dark:text-blue-400"
+                />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Active Timers</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  Active Timers
+                </h3>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {timeData.activeTimers}
                 </p>
@@ -151,10 +163,16 @@ const TimeTracking = () => {
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                <ApperIcon name="List" size={20} className="text-purple-600 dark:text-purple-400" />
+                <ApperIcon
+                  name="List"
+                  size={20}
+                  className="text-purple-600 dark:text-purple-400"
+                />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Time Entries</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  Time Entries
+                </h3>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {timeData.totalEntries}
                 </p>
@@ -179,7 +197,7 @@ const TimeTracking = () => {
               {timeData.taskBreakdown.length} tasks
             </Badge>
           </div>
-          
+
           <div className="space-y-3">
             {timeData.taskBreakdown.map((task, index) => (
               <motion.div
@@ -190,19 +208,24 @@ const TimeTracking = () => {
                 className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    task.hasActiveTimer ? "bg-green-500 animate-pulse" : "bg-gray-400"
-                  }`}></div>
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      task.hasActiveTimer
+                        ? "bg-green-500 animate-pulse"
+                        : "bg-gray-400"
+                    }`}
+                  ></div>
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">
                       {task.taskTitle}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Project {task.projectId} • {task.entryCount} entries
+                      Project {task.projectId?.Name || task.projectId?.Id} •{" "}
+                      {task.entryCount} entries
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm text-gray-900 dark:text-white">
                     {formatDuration(task.totalTime)}
