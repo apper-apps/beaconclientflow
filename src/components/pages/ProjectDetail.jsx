@@ -37,12 +37,12 @@ const [project, setProject] = useState(null);
     }
   }, [id]);
 
-  const loadProjectDetails = async () => {
+const loadProjectDetails = async () => {
     try {
       setLoading(true);
       setError("");
       
-const [projectData, clientsData, tasksData, timeTrackingData] = await Promise.all([
+      const [projectData, clientsData, tasksData, timeTrackingData] = await Promise.all([
         getProjectById(id),
         getAllClients(),
         getAllTasks(),
@@ -51,11 +51,11 @@ const [projectData, clientsData, tasksData, timeTrackingData] = await Promise.al
 
       setProject(projectData);
       
-// Find the client for this project
+      // Find the client for this project
       const projectClient = clientsData.find(c => c.Id === parseInt(projectData.client_id));
       setClient(projectClient);
       
-// Filter tasks for this project
+      // Filter tasks for this project - ensures real-time updates
       const projectTasks = tasksData.filter(t => t.project_id === String(projectData.Id));
       setTasks(projectTasks);
       setProjectTimeTracking(timeTrackingData);
@@ -65,6 +65,26 @@ const [projectData, clientsData, tasksData, timeTrackingData] = await Promise.al
       toast.error("Failed to load project details");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Real-time update handler for task changes
+  const handleTaskUpdate = async () => {
+    try {
+      // Refresh all project-related data to ensure real-time synchronization
+      const [tasksData, timeTrackingData] = await Promise.all([
+        getAllTasks(),
+        getProjectTimeTracking(id)
+      ]);
+      
+      // Update tasks with latest data
+      const projectTasks = tasksData.filter(t => t.project_id === String(project.Id));
+      setTasks(projectTasks);
+      setProjectTimeTracking(timeTrackingData);
+      
+    } catch (err) {
+      console.error("Error updating task data:", err);
+      // Silently handle errors to avoid disrupting user experience
     }
   };
 
@@ -613,9 +633,9 @@ const getDaysRemaining = () => {
               description="No tasks have been created for this project yet."
               icon="ListTodo"
             />
-          ) : taskViewMode === "kanban" ? (
+) : taskViewMode === "kanban" ? (
             <div className="mt-4">
-              <KanbanBoard tasks={tasks} projectId={parseInt(id)} onTaskUpdate={loadProjectDetails} />
+              <KanbanBoard tasks={tasks} projectId={parseInt(id)} onTaskUpdate={handleTaskUpdate} />
             </div>
           ) : (
             <div className="space-y-3">
