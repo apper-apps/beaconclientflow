@@ -18,6 +18,7 @@ import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import ApperIcon from "@/components/ApperIcon";
 import { getDashboardData, getRealTimeMetrics, getRealTimeActivity } from "@/services/api/dashboardService";
+import { createSampleActivities } from "@/services/api/recentActivityService";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -77,7 +78,19 @@ const loadDashboardData = async () => {
   };
 
 useEffect(() => {
-    loadDashboardData();
+    const initializeDashboard = async () => {
+      try {
+        // Create sample activities if none exist
+        await createSampleActivities();
+      } catch (error) {
+        console.error("Error initializing sample activities:", error);
+      }
+      
+      // Load dashboard data
+      await loadDashboardData();
+    };
+    
+    initializeDashboard();
     
     // Set up real-time refresh every 30 seconds for both metrics and activity
     refreshIntervalRef.current = setInterval(refreshDashboardData, 30000);

@@ -8,7 +8,7 @@ const RecentActivity = ({ recentActivity: propRecentActivity }) => {
   const { recentActivity, activityLoading, activityError } = useSelector((state) => state.dashboard);
   
   // Use Redux data if available, otherwise fall back to prop data
-  const displayActivity = recentActivity?.length > 0 ? recentActivity : propRecentActivity;
+  const displayActivity = recentActivity?.length > 0 ? recentActivity : (propRecentActivity || []);
   
   // Show loading state
   if (activityLoading && (!displayActivity || displayActivity.length === 0)) {
