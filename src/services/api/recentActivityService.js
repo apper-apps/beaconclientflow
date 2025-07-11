@@ -289,11 +289,11 @@ export const logUserActivity = async (activityData) => {
       activity_type: type.toLowerCase(),
       description: description || `${type} operation on ${entityType}: ${entityName}`,
       activity_timestamp: new Date().toISOString(),
-      client_id: clientId || null,
-      project_id: projectId || null,
-      task_id: taskId || null,
-      invoice_id: invoiceId || null,
-      Owner: userId || null
+      client_id: clientId ? parseInt(clientId) : null,
+      project_id: projectId ? parseInt(projectId) : null,
+      task_id: taskId ? parseInt(taskId) : null,
+      invoice_id: invoiceId ? parseInt(invoiceId) : null,
+      Owner: userId ? parseInt(userId) : null
     };
 
     return await create(activity);
