@@ -97,13 +97,13 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Statistics Cards */}
+{/* Statistics Cards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <DashboardStats />
+        <DashboardStats summary={data?.summary} />
       </motion.div>
 
       {/* Content Grid */}
@@ -113,7 +113,7 @@ const Dashboard = () => {
         transition={{ duration: 0.5, delay: 0.3 }}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
-        <RecentActivity />
+        <RecentActivity recentActivity={data?.recentActivity} />
         <QuickActions />
       </motion.div>
     </div>

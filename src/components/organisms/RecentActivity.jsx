@@ -4,54 +4,50 @@ import Card from "@/components/atoms/Card";
 import Badge from "@/components/atoms/Badge";
 import ApperIcon from "@/components/ApperIcon";
 
-const RecentActivity = () => {
-  const activities = [
-    {
-      id: 1,
-      type: "project",
-      title: "Project 'Website Redesign' marked as completed",
-      client: "TechCorp Inc",
-      time: "2 hours ago",
-      icon: "CheckCircle2",
-      iconColor: "text-green-500"
-    },
-    {
-      id: 2,
-      type: "task",
-      title: "New task assigned: 'Review wireframes'",
-      client: "StartupXYZ",
-      time: "4 hours ago",
-      icon: "Plus",
-      iconColor: "text-blue-500"
-    },
-    {
-      id: 3,
-      type: "invoice",
-      title: "Invoice #1247 sent to client",
-      client: "Digital Agency",
-      time: "6 hours ago",
-      icon: "FileText",
-      iconColor: "text-purple-500"
-    },
-    {
-      id: 4,
-      type: "client",
-      title: "New client 'Fashion Brand' added",
-      client: "Fashion Brand",
-      time: "1 day ago",
-      icon: "UserPlus",
-      iconColor: "text-emerald-500"
-    },
-    {
-      id: 5,
-      type: "payment",
-      title: "Payment received from TechCorp Inc",
-      client: "TechCorp Inc",
-      time: "2 days ago",
-      icon: "DollarSign",
-      iconColor: "text-green-600"
-    }
-  ];
+const RecentActivity = ({ recentActivity }) => {
+  // Handle case where activity data is not yet loaded
+  if (!recentActivity || recentActivity.length === 0) {
+    return (
+      <Card className="h-full">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Recent Activity
+            </h3>
+            <Badge variant="primary">Live</Badge>
+          </div>
+        </div>
+        
+        <div className="p-6">
+          <div className="space-y-4">
+            {recentActivity ? (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <ApperIcon name="Activity" size={48} className="mx-auto mb-4 text-gray-300" />
+                <p>No recent activity to display</p>
+              </div>
+            ) : (
+              // Loading skeleton
+              [...Array(5)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="flex items-start gap-4 p-3">
+                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div className="w-20 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      </div>
+                      <div className="w-3/4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="w-1/2 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   const getActivityBadge = (type) => {
     const badges = {
@@ -77,7 +73,7 @@ const RecentActivity = () => {
       
       <div className="p-6">
         <div className="space-y-4">
-          {activities.map((activity, index) => (
+          {recentActivity.map((activity, index) => (
             <motion.div
               key={activity.id}
               initial={{ opacity: 0, x: -20 }}
