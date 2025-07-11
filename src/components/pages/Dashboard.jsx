@@ -101,7 +101,7 @@ useEffect(() => {
         clearInterval(refreshIntervalRef.current);
       }
     };
-  }, []);
+  }, [dispatch]);
 
   if (loading) {
     return <Loading />;

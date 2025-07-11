@@ -120,7 +120,25 @@ export const createInvoice = async (invoiceData) => {
         throw new Error(failedRecords[0].message || "Failed to create invoice");
       }
       
-      return successfulRecords[0].data;
+      const createdInvoice = successfulRecords[0].data;
+      
+      // Log activity for invoice creation
+      try {
+        const { logUserActivity } = await import('./recentActivityService');
+        await logUserActivity({
+          type: 'Created',
+          entityName: createdInvoice.Name,
+          entityType: 'Invoice',
+          description: `New invoice "${createdInvoice.Name}" has been created`,
+          clientId: createdInvoice.client_id,
+          projectId: createdInvoice.project_id,
+          invoiceId: createdInvoice.Id
+        });
+      } catch (activityError) {
+        console.error('Failed to log invoice creation activity:', activityError);
+      }
+      
+      return createdInvoice;
     }
   } catch (error) {
     console.error("Error creating invoice:", error);
@@ -166,7 +184,25 @@ export const updateInvoice = async (id, invoiceData) => {
         throw new Error(failedUpdates[0].message || "Failed to update invoice");
       }
       
-      return successfulUpdates[0].data;
+      const updatedInvoice = successfulUpdates[0].data;
+      
+      // Log activity for invoice update
+      try {
+        const { logUserActivity } = await import('./recentActivityService');
+        await logUserActivity({
+          type: 'Updated',
+          entityName: updatedInvoice.Name,
+          entityType: 'Invoice',
+          description: `Invoice "${updatedInvoice.Name}" has been updated`,
+          clientId: updatedInvoice.client_id,
+          projectId: updatedInvoice.project_id,
+          invoiceId: updatedInvoice.Id
+        });
+      } catch (activityError) {
+        console.error('Failed to log invoice update activity:', activityError);
+      }
+      
+      return updatedInvoice;
     }
   } catch (error) {
     console.error("Error updating invoice:", error);

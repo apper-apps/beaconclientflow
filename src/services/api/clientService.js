@@ -103,7 +103,23 @@ export const createClient = async (clientData) => {
         throw new Error(failedRecords[0].message || "Failed to create client");
       }
       
-      return successfulRecords[0].data;
+      const createdClient = successfulRecords[0].data;
+      
+      // Log activity for client creation
+      try {
+        const { logUserActivity } = await import('./recentActivityService');
+        await logUserActivity({
+          type: 'Created',
+          entityName: createdClient.Name,
+          entityType: 'Client',
+          description: `New client "${createdClient.Name}" has been created`,
+          clientId: createdClient.Id
+        });
+      } catch (activityError) {
+        console.error('Failed to log client creation activity:', activityError);
+      }
+      
+      return createdClient;
     }
   } catch (error) {
     console.error("Error creating client:", error);
@@ -142,7 +158,23 @@ export const updateClient = async (id, clientData) => {
         throw new Error(failedUpdates[0].message || "Failed to update client");
       }
       
-      return successfulUpdates[0].data;
+      const updatedClient = successfulUpdates[0].data;
+      
+      // Log activity for client update
+      try {
+        const { logUserActivity } = await import('./recentActivityService');
+        await logUserActivity({
+          type: 'Updated',
+          entityName: updatedClient.Name,
+          entityType: 'Client',
+          description: `Client "${updatedClient.Name}" has been updated`,
+          clientId: updatedClient.Id
+        });
+      } catch (activityError) {
+        console.error('Failed to log client update activity:', activityError);
+      }
+      
+      return updatedClient;
     }
   } catch (error) {
     console.error("Error updating client:", error);

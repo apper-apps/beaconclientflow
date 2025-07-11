@@ -115,7 +115,24 @@ export const createTask = async (taskData) => {
         throw new Error(failedRecords[0].message || "Failed to create task");
       }
       
-      return successfulRecords[0].data;
+      const createdTask = successfulRecords[0].data;
+      
+      // Log activity for task creation
+      try {
+        const { logUserActivity } = await import('./recentActivityService');
+        await logUserActivity({
+          type: 'Created',
+          entityName: createdTask.Name || createdTask.title,
+          entityType: 'Task',
+          description: `New task "${createdTask.Name || createdTask.title}" has been created`,
+          projectId: createdTask.project_id,
+          taskId: createdTask.Id
+        });
+      } catch (activityError) {
+        console.error('Failed to log task creation activity:', activityError);
+      }
+      
+      return createdTask;
     }
   } catch (error) {
     console.error("Error creating task:", error);
@@ -159,7 +176,24 @@ export const updateTask = async (id, taskData) => {
         throw new Error(failedUpdates[0].message || "Failed to update task");
       }
       
-      return successfulUpdates[0].data;
+      const updatedTask = successfulUpdates[0].data;
+      
+      // Log activity for task update
+      try {
+        const { logUserActivity } = await import('./recentActivityService');
+        await logUserActivity({
+          type: 'Updated',
+          entityName: updatedTask.Name || updatedTask.title,
+          entityType: 'Task',
+          description: `Task "${updatedTask.Name || updatedTask.title}" has been updated`,
+          projectId: updatedTask.project_id,
+          taskId: updatedTask.Id
+        });
+      } catch (activityError) {
+        console.error('Failed to log task update activity:', activityError);
+      }
+      
+      return updatedTask;
     }
   } catch (error) {
     console.error("Error updating task:", error);

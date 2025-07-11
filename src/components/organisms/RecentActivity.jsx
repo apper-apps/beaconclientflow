@@ -4,6 +4,9 @@ import { useSelector } from "react-redux";
 import ApperIcon from "@/components/ApperIcon";
 import Badge from "@/components/atoms/Badge";
 import Card from "@/components/atoms/Card";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import { getAll, getRecentActivities } from "@/services/api/recentActivityService";
 const RecentActivity = ({ recentActivity: propRecentActivity }) => {
   const { recentActivity, activityLoading, activityError } = useSelector((state) => state.dashboard);
   

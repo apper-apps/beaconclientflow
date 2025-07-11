@@ -286,7 +286,7 @@ export const logUserActivity = async (activityData) => {
     
     const activity = {
       Name: `${type} ${entityType}`,
-      activity_type: type,
+      activity_type: type.toLowerCase(),
       description: description || `${type} operation on ${entityType}: ${entityName}`,
       activity_timestamp: new Date().toISOString(),
       client_id: clientId || null,

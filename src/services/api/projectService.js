@@ -109,7 +109,24 @@ export const createProject = async (projectData) => {
         throw new Error(failedRecords[0].message || "Failed to create project");
       }
       
-      return successfulRecords[0].data;
+      const createdProject = successfulRecords[0].data;
+      
+      // Log activity for project creation
+      try {
+        const { logUserActivity } = await import('./recentActivityService');
+        await logUserActivity({
+          type: 'Created',
+          entityName: createdProject.Name,
+          entityType: 'Project',
+          description: `New project "${createdProject.Name}" has been created`,
+          clientId: createdProject.client_id,
+          projectId: createdProject.Id
+        });
+      } catch (activityError) {
+        console.error('Failed to log project creation activity:', activityError);
+      }
+      
+      return createdProject;
     }
   } catch (error) {
     console.error("Error creating project:", error);
@@ -151,7 +168,24 @@ export const updateProject = async (id, projectData) => {
         throw new Error(failedUpdates[0].message || "Failed to update project");
       }
       
-      return successfulUpdates[0].data;
+      const updatedProject = successfulUpdates[0].data;
+      
+      // Log activity for project update
+      try {
+        const { logUserActivity } = await import('./recentActivityService');
+        await logUserActivity({
+          type: 'Updated',
+          entityName: updatedProject.Name,
+          entityType: 'Project',
+          description: `Project "${updatedProject.Name}" has been updated`,
+          clientId: updatedProject.client_id,
+          projectId: updatedProject.Id
+        });
+      } catch (activityError) {
+        console.error('Failed to log project update activity:', activityError);
+      }
+      
+      return updatedProject;
     }
   } catch (error) {
     console.error("Error updating project:", error);
