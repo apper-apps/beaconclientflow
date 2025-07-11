@@ -1,12 +1,15 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import StatCard from "@/components/molecules/StatCard";
 
 const DashboardStats = ({ summary }) => {
-  // Handle case where summary data is not yet loaded
-  if (!summary) {
+  const { metrics, loading } = useSelector((state) => state.dashboard);
+  
+  // Handle case where data is not yet loaded
+  if (loading || !metrics) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, index) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        {[...Array(5)].map((_, index) => (
           <div key={index} className="animate-pulse">
             <div className="bg-gray-200 dark:bg-gray-700 h-32 rounded-lg"></div>
           </div>
@@ -17,57 +20,49 @@ const DashboardStats = ({ summary }) => {
 
   const stats = [
     {
-      title: "Total Clients",
-      value: summary.totalClients?.toString() || "0",
-      change: summary.totalClients > 0 ? `${summary.totalClients} total` : "No clients yet",
-      changeType: summary.totalClients > 0 ? "positive" : "neutral",
+      title: "Clients",
+      value: metrics.clientCount?.toString() || "0",
+      change: metrics.clientCount > 0 ? `${metrics.clientCount} total` : "No clients yet",
+      changeType: metrics.clientCount > 0 ? "positive" : "neutral",
       icon: "Users",
       delay: 0
     },
     {
-      title: "Active Projects",
-      value: summary.activeProjects?.toString() || "0",
-      change: summary.activeProjects > 0 ? `${summary.activeProjects} active` : "No active projects",
-      changeType: summary.activeProjects > 0 ? "positive" : "neutral",
+      title: "Projects",
+      value: metrics.projectCount?.toString() || "0",
+      change: metrics.projectCount > 0 ? `${metrics.projectCount} total` : "No projects yet",
+      changeType: metrics.projectCount > 0 ? "positive" : "neutral",
       icon: "FolderOpen",
       delay: 0.1
     },
     {
-      title: "Pending Tasks",
-      value: summary.pendingTasks?.toString() || "0",
-      change: summary.pendingTasks > 0 ? `${summary.pendingTasks} pending` : "No pending tasks",
-      changeType: summary.pendingTasks > 0 ? "neutral" : "positive",
+      title: "Tasks",
+      value: metrics.taskCount?.toString() || "0",
+      change: metrics.taskCount > 0 ? `${metrics.taskCount} total` : "No tasks yet",
+      changeType: metrics.taskCount > 0 ? "positive" : "neutral",
       icon: "CheckSquare",
       delay: 0.2
     },
     {
-      title: "Monthly Revenue",
-      value: summary.monthlyRevenue ? `$${summary.monthlyRevenue.toLocaleString()}` : "$0",
-      change: summary.monthlyRevenue > 0 ? "This month" : "No revenue yet",
-      changeType: summary.monthlyRevenue > 0 ? "positive" : "neutral",
-      icon: "DollarSign",
+      title: "Time Tracking",
+      value: metrics.timeTrackingCount?.toString() || "0",
+      change: metrics.timeTrackingCount > 0 ? `${metrics.timeTrackingCount} tracked` : "No time tracked",
+      changeType: metrics.timeTrackingCount > 0 ? "positive" : "neutral",
+      icon: "Clock",
       delay: 0.3
     },
     {
-      title: "Completed Tasks",
-      value: summary.completedTasks?.toString() || "0",
-      change: summary.completedTasks > 0 ? `${summary.completedTasks} completed` : "No completed tasks",
-      changeType: summary.completedTasks > 0 ? "positive" : "neutral",
-      icon: "CheckCircle2",
+      title: "Invoices",
+      value: metrics.invoiceCount?.toString() || "0",
+      change: metrics.invoiceCount > 0 ? `${metrics.invoiceCount} total` : "No invoices yet",
+      changeType: metrics.invoiceCount > 0 ? "positive" : "neutral",
+      icon: "FileText",
       delay: 0.4
-    },
-    {
-      title: "Overdue Items",
-      value: summary.overdueItems?.toString() || "0",
-      change: summary.overdueItems > 0 ? `${summary.overdueItems} overdue` : "No overdue items",
-      changeType: summary.overdueItems > 0 ? "negative" : "positive",
-      icon: "AlertTriangle",
-      delay: 0.5
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
       {stats.map((stat, index) => (
         <StatCard
           key={index}

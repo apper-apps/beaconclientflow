@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { setMetricsLoading, setMetrics, setMetricsError } from "@/store/dashboardSlice";
 import DashboardStats from "@/components/organisms/DashboardStats";
 import RecentActivity from "@/components/organisms/RecentActivity";
 import QuickActions from "@/components/organisms/QuickActions";
@@ -8,12 +10,15 @@ import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import ApperIcon from "@/components/ApperIcon";
-import { getDashboardData } from "@/services/api/dashboardService";
+import { getDashboardData, getRealTimeMetrics } from "@/services/api/dashboardService";
 
 const Dashboard = () => {
+  const dispatch = useDispatch();
+  const { metrics, loading: metricsLoading, error: metricsError } = useSelector((state) => state.dashboard);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const refreshIntervalRef = useRef(null);
 
   const loadDashboardData = async () => {
     try {
@@ -21,16 +26,43 @@ const Dashboard = () => {
       setError("");
       const dashboardData = await getDashboardData();
       setData(dashboardData);
+      
+      // Update metrics in Redux store
+      if (dashboardData.realTimeMetrics) {
+        dispatch(setMetrics(dashboardData.realTimeMetrics));
+      }
     } catch (err) {
       setError("Failed to load dashboard data. Please try again.");
       toast.error("Failed to load dashboard data");
+      dispatch(setMetricsError(err.message));
     } finally {
       setLoading(false);
     }
   };
 
+  const refreshMetrics = async () => {
+    try {
+      dispatch(setMetricsLoading(true));
+      const realTimeMetrics = await getRealTimeMetrics();
+      dispatch(setMetrics(realTimeMetrics));
+    } catch (err) {
+      console.error("Failed to refresh metrics:", err);
+      dispatch(setMetricsError(err.message));
+    }
+  };
+
   useEffect(() => {
     loadDashboardData();
+    
+    // Set up real-time refresh every 30 seconds
+    refreshIntervalRef.current = setInterval(refreshMetrics, 30000);
+    
+    // Cleanup interval on unmount
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
   }, []);
 
   if (loading) {
@@ -69,39 +101,21 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
             Dashboard
           </h1>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <ApperIcon name="RefreshCw" size={14} className={metricsLoading ? "animate-spin" : ""} />
+            <span>Real-time updates</span>
+          </div>
         </div>
         <p className="text-gray-600 dark:text-gray-400">
-          Welcome back! Here's an overview of your freelance business.
+          Welcome back! Here's an overview of your freelance business with real-time metrics.
         </p>
       </motion.div>
 
-      {/* Welcome Message */}
+      {/* Statistics Cards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 rounded-2xl p-6 text-white shadow-xl"
-      >
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold">Good morning, John! 👋</h2>
-            <p className="text-primary-100">
-              You have 3 projects due this week and 5 pending invoices to review.
-            </p>
-          </div>
-          <div className="hidden sm:block">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <ApperIcon name="TrendingUp" size={28} className="text-white" />
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-{/* Statistics Cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
       >
         <DashboardStats summary={data?.summary} />
       </motion.div>
@@ -110,7 +124,7 @@ const Dashboard = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
         <RecentActivity recentActivity={data?.recentActivity} />

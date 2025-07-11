@@ -4,10 +4,11 @@ const apperClient = new ApperClient({
   apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
 });
 
-export const getDashboardData = async () => {
+// Real-time metrics service for dashboard
+export const getRealTimeMetrics = async () => {
   try {
-    // Fetch dashboard statistics using aggregators
-    const statsParams = {
+    // Get client count
+    const clientParams = {
       aggregators: [
         {
           id: "totalClients",
@@ -17,101 +18,24 @@ export const getDashboardData = async () => {
               Function: "Count"
             }
           ]
-        },
-        {
-          id: "activeProjects", 
-          fields: [
-            {
-              field: { Name: "Id" },
-              Function: "Count"
-            }
-          ],
-          where: [
-            {
-              FieldName: "status",
-              Operator: "EqualTo",
-              Values: ["active"]
-            }
-          ]
-        },
-        {
-          id: "pendingTasks",
-          fields: [
-            {
-              field: { Name: "Id" },
-              Function: "Count"
-            }
-          ],
-          where: [
-            {
-              FieldName: "status", 
-              Operator: "ExactMatch",
-              Values: ["todo", "in-progress"]
-            }
-          ]
-        },
-        {
-          id: "completedTasks",
-          fields: [
-            {
-              field: { Name: "Id" },
-              Function: "Count"
-            }
-          ],
-          where: [
-            {
-              FieldName: "status",
-              Operator: "EqualTo", 
-              Values: ["done"]
-            }
-          ]
-        },
-        {
-          id: "overdueItems",
-          fields: [
-            {
-              field: { Name: "Id" },
-              Function: "Count"
-            }
-          ],
-          where: [
-            {
-              FieldName: "due_date",
-              Operator: "LessThan",
-              Values: [new Date().toISOString().split('T')[0]]
-            },
-            {
-              FieldName: "status",
-              Operator: "NotEqualTo",
-              Values: ["done"]
-            }
-          ]
         }
       ]
     };
 
-    // Get client statistics
-    const clientResponse = await apperClient.fetchRecords("client", statsParams);
+    const clientResponse = await apperClient.fetchRecords("client", clientParams);
     if (!clientResponse.success) {
       throw new Error(clientResponse.message);
     }
 
-    // Get project statistics  
+    // Get project count
     const projectParams = {
       aggregators: [
         {
-          id: "activeProjects",
+          id: "totalProjects",
           fields: [
             {
               field: { Name: "Id" },
               Function: "Count"
-            }
-          ],
-          where: [
-            {
-              FieldName: "status",
-              Operator: "EqualTo",
-              Values: ["active"]
             }
           ]
         }
@@ -123,59 +47,15 @@ export const getDashboardData = async () => {
       throw new Error(projectResponse.message);
     }
 
-    // Get task statistics
+    // Get task count
     const taskParams = {
       aggregators: [
         {
-          id: "pendingTasks",
+          id: "totalTasks",
           fields: [
             {
               field: { Name: "Id" },
               Function: "Count"
-            }
-          ],
-          where: [
-            {
-              FieldName: "status",
-              Operator: "ExactMatch", 
-              Values: ["todo", "in-progress"]
-            }
-          ]
-        },
-        {
-          id: "completedTasks",
-          fields: [
-            {
-              field: { Name: "Id" },
-              Function: "Count"
-            }
-          ],
-          where: [
-            {
-              FieldName: "status",
-              Operator: "EqualTo",
-              Values: ["done"]
-            }
-          ]
-        },
-        {
-          id: "overdueItems",
-          fields: [
-            {
-              field: { Name: "Id" },
-              Function: "Count"
-            }
-          ],
-          where: [
-            {
-              FieldName: "due_date",
-              Operator: "LessThan",
-              Values: [new Date().toISOString().split('T')[0]]
-            },
-            {
-              FieldName: "status",
-              Operator: "NotEqualTo", 
-              Values: ["done"]
             }
           ]
         }
@@ -187,27 +67,42 @@ export const getDashboardData = async () => {
       throw new Error(taskResponse.message);
     }
 
-    // Get invoice statistics for revenue
-    const invoiceParams = {
+    // Get time tracking count (tasks with time tracking data)
+    const timeTrackingParams = {
       aggregators: [
         {
-          id: "monthlyRevenue",
+          id: "timeTrackingCount",
           fields: [
             {
-              field: { Name: "amount" },
-              Function: "Sum"
+              field: { Name: "Id" },
+              Function: "Count"
             }
           ],
           where: [
             {
-              FieldName: "CreatedOn",
-              Operator: "RelativeMatch",
-              Values: ["this month"]
-            },
+              FieldName: "time_tracking",
+              Operator: "HasValue",
+              Values: []
+            }
+          ]
+        }
+      ]
+    };
+
+    const timeTrackingResponse = await apperClient.fetchRecords("task", timeTrackingParams);
+    if (!timeTrackingResponse.success) {
+      throw new Error(timeTrackingResponse.message);
+    }
+
+    // Get invoice count
+    const invoiceParams = {
+      aggregators: [
+        {
+          id: "totalInvoices",
+          fields: [
             {
-              FieldName: "status",
-              Operator: "EqualTo",
-              Values: ["paid"]
+              field: { Name: "Id" },
+              Function: "Count"
             }
           ]
         }
@@ -218,6 +113,32 @@ export const getDashboardData = async () => {
     if (!invoiceResponse.success) {
       throw new Error(invoiceResponse.message);
     }
+
+    // Extract counts from aggregator results
+    const clientCount = clientResponse.aggregators?.find(a => a.id === "totalClients")?.value || 0;
+    const projectCount = projectResponse.aggregators?.find(a => a.id === "totalProjects")?.value || 0;
+    const taskCount = taskResponse.aggregators?.find(a => a.id === "totalTasks")?.value || 0;
+    const timeTrackingCount = timeTrackingResponse.aggregators?.find(a => a.id === "timeTrackingCount")?.value || 0;
+    const invoiceCount = invoiceResponse.aggregators?.find(a => a.id === "totalInvoices")?.value || 0;
+
+    return {
+      clientCount,
+      projectCount,
+      taskCount,
+      timeTrackingCount,
+      invoiceCount
+    };
+
+  } catch (error) {
+    console.error("Error fetching real-time metrics:", error);
+    throw new Error(`Failed to fetch real-time metrics: ${error.message}`);
+  }
+};
+
+export const getDashboardData = async () => {
+  try {
+    // Get real-time metrics
+    const metrics = await getRealTimeMetrics();
 
     // Get recent activity data
     const recentActivityParams = {
@@ -243,14 +164,6 @@ export const getDashboardData = async () => {
     const recentProjectsResponse = await apperClient.fetchRecords("project", recentActivityParams);
     const recentTasksResponse = await apperClient.fetchRecords("task", recentActivityParams);
     const recentInvoicesResponse = await apperClient.fetchRecords("app_invoice", recentActivityParams);
-
-    // Extract aggregator results
-    const totalClients = clientResponse.aggregators?.find(a => a.id === "totalClients")?.value || 0;
-    const activeProjects = projectResponse.aggregators?.find(a => a.id === "activeProjects")?.value || 0;
-    const pendingTasks = taskResponse.aggregators?.find(a => a.id === "pendingTasks")?.value || 0;
-    const completedTasks = taskResponse.aggregators?.find(a => a.id === "completedTasks")?.value || 0;
-    const overdueItems = taskResponse.aggregators?.find(a => a.id === "overdueItems")?.value || 0;
-    const monthlyRevenue = invoiceResponse.aggregators?.find(a => a.id === "monthlyRevenue")?.value || 0;
 
     // Process recent activities
     const recentActivity = [];
@@ -321,20 +234,21 @@ export const getDashboardData = async () => {
 
     return {
       summary: {
-        totalClients,
-        activeProjects,
-        pendingTasks,
-        monthlyRevenue,
-        completedTasks,
-        overdueItems
+        totalClients: metrics.clientCount,
+        activeProjects: metrics.projectCount,
+        pendingTasks: metrics.taskCount,
+        monthlyRevenue: 0, // Keep for compatibility
+        completedTasks: 0, // Keep for compatibility
+        overdueItems: 0 // Keep for compatibility
       },
       recentActivity: limitedActivity,
       quickStats: {
-        projectsThisWeek: activeProjects,
-        tasksCompleted: completedTasks,
-        hoursTracked: 0, // This would need time tracking data
-        invoicesSent: 0  // This would need sent invoices count
-      }
+        projectsThisWeek: metrics.projectCount,
+        tasksCompleted: 0,
+        hoursTracked: metrics.timeTrackingCount,
+        invoicesSent: metrics.invoiceCount
+      },
+      realTimeMetrics: metrics
     };
 
   } catch (error) {
