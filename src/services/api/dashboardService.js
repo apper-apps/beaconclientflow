@@ -1,3 +1,5 @@
+import React from "react";
+import Error from "@/components/ui/Error";
 const { ApperClient } = window.ApperSDK;
 const apperClient = new ApperClient({
   apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
@@ -136,6 +138,7 @@ export const getRealTimeMetrics = async () => {
 };
 
 // Get real-time recent activity data
+// Get real-time recent activity data
 export const getRealTimeActivity = async () => {
   try {
     const activityParams = {
@@ -145,9 +148,11 @@ export const getRealTimeActivity = async () => {
         { field: { Name: "client_id" } },
         { field: { Name: "project_id" } },
         { field: { Name: "task_id" } },
+        { field: { Name: "invoice_id" } },
         { field: { Name: "description" } },
         { field: { Name: "activity_timestamp" } },
-        { field: { Name: "CreatedOn" } }
+        { field: { Name: "CreatedOn" } },
+        { field: { Name: "ModifiedOn" } }
       ],
       orderBy: [
         {
@@ -167,21 +172,32 @@ export const getRealTimeActivity = async () => {
       throw new Error(response.message);
     }
 
-    // Process activity data
-    const activities = response.data?.map(activity => ({
-      id: `activity-${activity.Id}`,
-      type: activity.activity_type || "activity",
-      title: activity.Name || activity.description || "Activity",
-      client: activity.client_id?.Name || "Unknown",
-      time: formatTimeAgo(activity.activity_timestamp || activity.CreatedOn),
-      icon: getActivityIcon(activity.activity_type),
-      iconColor: getActivityIconColor(activity.activity_type),
-      description: activity.description
-    })) || [];
+    // Handle empty response
+    if (!response.data || response.data.length === 0) {
+      return [];
+    }
+
+    // Process activity data with improved mapping
+    const activities = response.data.map(activity => {
+      const activityType = activity.activity_type || "activity";
+      const timestamp = activity.activity_timestamp || activity.ModifiedOn || activity.CreatedOn;
+      
+      return {
+        id: activity.Id,
+        type: activityType,
+        title: activity.Name || activity.description || "Recent Activity",
+        client: activity.client_id?.Name || "Unknown Client",
+        time: formatTimeAgo(timestamp),
+        icon: getActivityIcon(activityType),
+        iconColor: getActivityIconColor(activityType),
+        description: activity.description,
+        timestamp: timestamp
+      };
+    });
 
     return activities;
 
-  } catch (error) {
+} catch (error) {
     console.error("Error fetching real-time activity:", error);
     throw new Error(`Failed to fetch real-time activity: ${error.message}`);
   }

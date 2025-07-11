@@ -10,8 +10,36 @@ const RecentActivity = ({ recentActivity: propRecentActivity }) => {
   // Use Redux data if available, otherwise fall back to prop data
   const displayActivity = recentActivity?.length > 0 ? recentActivity : propRecentActivity;
   
-  // Handle case where activity data is not yet loaded
-if (!displayActivity || displayActivity.length === 0) {
+  // Show loading state
+  if (activityLoading && (!displayActivity || displayActivity.length === 0)) {
+    return (
+      <Card className="h-full">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Recent Activity
+            </h3>
+            <div className="flex items-center gap-2">
+              <ApperIcon name="RefreshCw" size={14} className="animate-spin text-primary-500" />
+              <Badge variant="primary">Live</Badge>
+            </div>
+          </div>
+        </div>
+        
+        <div className="p-6">
+          <div className="space-y-4">
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+              <ApperIcon name="RefreshCw" size={48} className="mx-auto mb-4 text-gray-300 animate-spin" />
+              <p>Loading recent activity...</p>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+  
+  // Handle case where activity data is not yet loaded or empty
+  if (!displayActivity || displayActivity.length === 0) {
     return (
       <Card className="h-full">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -26,11 +54,16 @@ if (!displayActivity || displayActivity.length === 0) {
           </div>
         </div>
         
-<div className="p-6">
+        <div className="p-6">
           <div className="space-y-4">
             <div className="text-center text-gray-500 dark:text-gray-400 py-8">
               <ApperIcon name="Activity" size={48} className="mx-auto mb-4 text-gray-300" />
               <p>No recent activity to display</p>
+              {activityError && (
+                <p className="text-red-500 text-sm mt-2">
+                  Error loading activity: {activityError}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -65,9 +98,9 @@ if (!displayActivity || displayActivity.length === 0) {
       
       <div className="p-6">
         <div className="space-y-4">
-          {displayActivity.map((activity, index) => (
+{displayActivity.map((activity, index) => (
             <motion.div
-              key={activity.id}
+              key={`activity-${activity.id}-${activity.timestamp}`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -88,6 +121,9 @@ if (!displayActivity || displayActivity.length === 0) {
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {activity.time}
                   </span>
+                  {activityLoading && index === 0 && (
+                    <ApperIcon name="RefreshCw" size={12} className="animate-spin text-primary-500" />
+                  )}
                 </div>
                 
                 <p className="text-sm text-gray-900 dark:text-white font-medium mb-1">

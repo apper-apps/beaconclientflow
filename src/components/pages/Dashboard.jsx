@@ -150,9 +150,9 @@ useEffect(() => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
-<RecentActivity recentActivity={recentActivity} />
+        <RecentActivity />
         <QuickActions />
       </motion.div>
     </div>
