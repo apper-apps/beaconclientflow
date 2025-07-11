@@ -61,11 +61,13 @@ const ProjectModal = ({
     setErrors({});
   }, [project]);
 
-  const loadClients = async () => {
+const loadClients = async () => {
     try {
       setLoadingClients(true);
       const clientsData = await getAllClients();
-      setClients(clientsData || []);
+      // Filter for active clients only
+      const activeClients = clientsData.filter(client => client.status === 'active');
+      setClients(activeClients || []);
     } catch (error) {
       console.error('Failed to load clients:', error);
       toast.error('Failed to load clients');
@@ -157,6 +159,11 @@ const getClientName = (clientId) => {
     return client ? client.Name : 'Unknown Client';
   };
 
+  const getSelectedClientDetails = () => {
+    if (!formData.clientId) return null;
+    return clients.find(c => c.Id === parseInt(formData.clientId));
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -199,7 +206,7 @@ size="lg"
           />
         </div>
 
-        {/* Client Selection */}
+{/* Client Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Client *
@@ -217,16 +224,21 @@ size="lg"
                         ${errors.clientId ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
               required
             >
-<option value="">Select a client</option>
+              <option value="">Select a client</option>
               {clients.map(client => (
-<option key={client.Id} value={client.Id}>
-                  {client.Name}
+                <option key={client.Id} value={client.Id}>
+                  {client.Name} - {client.company}
                 </option>
               ))}
             </select>
           )}
           {errors.clientId && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.clientId}</p>
+          )}
+          {getSelectedClientDetails() && (
+            <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              Company: {getSelectedClientDetails().company} | Status: {getSelectedClientDetails().status}
+            </div>
           )}
         </div>
 

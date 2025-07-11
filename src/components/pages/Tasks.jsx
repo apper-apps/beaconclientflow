@@ -40,12 +40,14 @@ const Tasks = () => {
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [projectsError, setProjectsError] = useState("");
 
-  const loadProjects = async () => {
+const loadProjects = async () => {
     try {
       setProjectsLoading(true);
       setProjectsError("");
       const projectData = await getAllProjects();
-      setProjects(projectData);
+      // Filter for active projects only
+      const activeProjects = projectData.filter(project => project.status === 'active');
+      setProjects(activeProjects);
     } catch (err) {
       setProjectsError("Failed to load projects");
       console.error("Error loading projects:", err);
@@ -614,7 +616,7 @@ setTaskFormData({
 
 <div>
               <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Project *
+                Active Project *
               </label>
               <select
                 id="projectId"
@@ -623,19 +625,26 @@ setTaskFormData({
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
               >
-                <option value="">Select a project</option>
+                <option value="">Select an active project</option>
                 {projectsLoading ? (
                   <option disabled>Loading projects...</option>
                 ) : projectsError ? (
                   <option disabled>Error loading projects</option>
+                ) : projects.length === 0 ? (
+                  <option disabled>No active projects available</option>
                 ) : (
                   projects.map(project => (
                     <option key={project.Id} value={project.Id}>
-                      {project.Name}
+                      {project.Name} - {project.status}
                     </option>
                   ))
                 )}
               </select>
+              {projects.length === 0 && !projectsLoading && !projectsError && (
+                <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                  No active projects found. Create an active project first.
+                </p>
+              )}
             </div>
           </div>
 

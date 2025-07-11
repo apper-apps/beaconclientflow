@@ -43,11 +43,15 @@ setFormData({
     }
   }, [isOpen, initialData]);
 
-  const loadProjects = async () => {
+const loadProjects = async () => {
     try {
       setLoadingProjects(true);
       const projectsData = await getAllProjects();
-      setProjects(projectsData);
+      // Filter for active projects only for invoicing
+      const activeProjects = projectsData.filter(project => 
+        project.status === 'active' || project.status === 'completed'
+      );
+      setProjects(activeProjects);
     } catch (error) {
       toast.error("Failed to load projects");
     } finally {
@@ -101,14 +105,19 @@ setFormData({
     return formData.lineItems.reduce((total, item) => total + (item.amount || 0), 0);
   };
 
-  const getProjectName = (projectId) => {
+const getProjectName = (projectId) => {
     const project = projects.find(p => p.Id === parseInt(projectId));
-    return project ? project.name : 'Unknown Project';
+    return project ? project.Name : 'Unknown Project';
   };
 
   const getProjectClientId = (projectId) => {
     const project = projects.find(p => p.Id === parseInt(projectId));
-    return project ? project.clientId : '';
+    return project ? project.client_id : '';
+  };
+
+  const getSelectedProjectDetails = () => {
+    if (!formData.projectId) return null;
+    return projects.find(p => p.Id === parseInt(formData.projectId));
   };
 
   const validateForm = () => {
@@ -198,26 +207,36 @@ try {
         <div>
             <label
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project *
-                          </label>
+                                          </label>
             <select
                 name="projectId"
                 value={formData.projectId}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-disabled={loadingProjects}>
-                <option value="">Select a project</option>
-                {projects.map((project) => (
-                <option key={project.Id} value={project.Id}>
-                    {project.Name}- Client ID: {project.client_id}
-                </option>))}
-                          </select>
+                disabled={loadingProjects}>
+                <option value="">Select a billable project</option>
+                {projects.map(project => <option key={project.Id} value={project.Id}>
+                    {project.Name}- {project.status}
+                </option>)}
+            </select>
             {errors.projectId && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.projectId}</p>}
+            {getSelectedProjectDetails() && <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Selected Project Details
+                                    </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Project: {getSelectedProjectDetails().Name}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Status: {getSelectedProjectDetails().status}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Client ID: {getSelectedProjectDetails().client_id}
+                </p>
+            </div>}
         </div>
+        {errors.projectId && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.projectId}</p>}
         {/* Due Date */}
         <div>
             <label
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Due Date *
-                          </label>
+                                          </label>
             <Input
                 type="date"
                 name="dueDate"
@@ -230,7 +249,7 @@ disabled={loadingProjects}>
         <div>
             <label
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status
-                          </label>
+                                          </label>
             <select
                 name="status"
                 value={formData.status}
@@ -246,7 +265,7 @@ disabled={loadingProjects}>
         {formData.status === "paid" && <div>
             <label
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Payment Date
-                            </label>
+                                            </label>
             <Input
                 type="date"
                 name="paymentDate"
@@ -259,10 +278,10 @@ disabled={loadingProjects}>
         <div>
             <div className="flex items-center justify-between mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Line Items *
-                                </label>
+                                                    </label>
                 <Button type="button" variant="outline" size="sm" onClick={addLineItem}>
                     <ApperIcon name="Plus" size={14} className="mr-2" />Add Item
-                                </Button>
+                                                    </Button>
             </div>
             <div className="space-y-3">
                 {formData.lineItems.map((item, index) => <Card key={index} className="p-4">
@@ -303,7 +322,7 @@ disabled={loadingProjects}>
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
             <div className="flex justify-between items-center">
                 <span className="text-lg font-medium text-gray-900 dark:text-white">Total Amount:
-                                </span>
+                                                    </span>
                 <span className="text-2xl font-bold text-green-600 dark:text-green-400">${calculateTotal().toLocaleString()}
                 </span>
             </div>
@@ -312,7 +331,7 @@ disabled={loadingProjects}>
         <div
             className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel
-                          </Button>
+                                          </Button>
             <Button type="submit" variant="primary" disabled={isSubmitting}>
                 {isSubmitting ? <>
                     <ApperIcon name="Loader2" size={16} className="mr-2 animate-spin" />
