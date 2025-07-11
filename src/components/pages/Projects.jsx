@@ -13,7 +13,7 @@ import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import SearchBar from "@/components/molecules/SearchBar";
 import ProjectModal from "@/components/molecules/ProjectModal";
-import { createProject, getAllProjects } from "@/services/api/projectService";
+import { createProject, getAllProjects, updateProject } from "@/services/api/projectService";
 import { getAllClients } from "@/services/api/clientService";
 const Projects = () => {
   const navigate = useNavigate();
@@ -53,14 +53,16 @@ const [isModalOpen, setIsModalOpen] = useState(false);
     setIsModalOpen(true);
   };
 
-  const handleProjectSubmit = async (projectData) => {
+const handleProjectSubmit = async (projectData) => {
     try {
       if (editingProject) {
         // Handle project update
+        await updateProject(editingProject.Id, projectData);
         await loadProjects();
         toast.success("Project updated successfully");
       } else {
         // Handle project creation
+        await createProject(projectData);
         await loadProjects();
         toast.success("Project created successfully");
       }
