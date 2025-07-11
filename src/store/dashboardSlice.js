@@ -11,12 +11,15 @@ const initialState = {
   loading: false,
   error: null,
   lastUpdated: null,
+  recentActivity: [],
+  activityLoading: false,
+  activityError: null,
 };
 
 export const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState,
-  reducers: {
+reducers: {
     setMetricsLoading: (state, action) => {
       state.loading = action.payload;
     },
@@ -50,10 +53,38 @@ export const dashboardSlice = createSlice({
       state.metrics.invoiceCount = action.payload;
       state.lastUpdated = new Date().toISOString();
     },
+    setActivityLoading: (state, action) => {
+      state.activityLoading = action.payload;
+    },
+    setRecentActivity: (state, action) => {
+      state.recentActivity = action.payload;
+      state.activityLoading = false;
+      state.activityError = null;
+    },
+    setActivityError: (state, action) => {
+      state.activityError = action.payload;
+      state.activityLoading = false;
+    },
+    addRecentActivity: (state, action) => {
+      state.recentActivity.unshift(action.payload);
+      if (state.recentActivity.length > 10) {
+        state.recentActivity = state.recentActivity.slice(0, 10);
+      }
+    },
+    updateRecentActivity: (state, action) => {
+      const index = state.recentActivity.findIndex(item => item.id === action.payload.id);
+      if (index !== -1) {
+        state.recentActivity[index] = action.payload;
+      }
+    },
     clearMetrics: (state) => {
       state.metrics = initialState.metrics;
       state.error = null;
       state.lastUpdated = null;
+    },
+    clearRecentActivity: (state) => {
+      state.recentActivity = [];
+      state.activityError = null;
     },
   },
 });
@@ -67,7 +98,13 @@ export const {
   updateTaskCount,
   updateTimeTrackingCount,
   updateInvoiceCount,
+  setActivityLoading,
+  setRecentActivity,
+  setActivityError,
+  addRecentActivity,
+  updateRecentActivity,
   clearMetrics,
+  clearRecentActivity,
 } = dashboardSlice.actions;
 
 export default dashboardSlice.reducer;

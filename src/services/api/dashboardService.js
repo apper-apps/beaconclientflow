@@ -135,102 +135,93 @@ export const getRealTimeMetrics = async () => {
   }
 };
 
+// Get real-time recent activity data
+export const getRealTimeActivity = async () => {
+  try {
+    const activityParams = {
+      fields: [
+        { field: { Name: "Name" } },
+        { field: { Name: "activity_type" } },
+        { field: { Name: "client_id" } },
+        { field: { Name: "project_id" } },
+        { field: { Name: "task_id" } },
+        { field: { Name: "description" } },
+        { field: { Name: "activity_timestamp" } },
+        { field: { Name: "CreatedOn" } }
+      ],
+      orderBy: [
+        {
+          fieldName: "activity_timestamp",
+          sorttype: "DESC"
+        }
+      ],
+      pagingInfo: {
+        limit: 10,
+        offset: 0
+      }
+    };
+
+    const response = await apperClient.fetchRecords("recent_activity", activityParams);
+    
+    if (!response.success) {
+      throw new Error(response.message);
+    }
+
+    // Process activity data
+    const activities = response.data?.map(activity => ({
+      id: `activity-${activity.Id}`,
+      type: activity.activity_type || "activity",
+      title: activity.Name || activity.description || "Activity",
+      client: activity.client_id?.Name || "Unknown",
+      time: formatTimeAgo(activity.activity_timestamp || activity.CreatedOn),
+      icon: getActivityIcon(activity.activity_type),
+      iconColor: getActivityIconColor(activity.activity_type),
+      description: activity.description
+    })) || [];
+
+    return activities;
+
+  } catch (error) {
+    console.error("Error fetching real-time activity:", error);
+    throw new Error(`Failed to fetch real-time activity: ${error.message}`);
+  }
+};
+
+// Helper function to get activity icon
+const getActivityIcon = (activityType) => {
+  const iconMap = {
+    'client': 'UserPlus',
+    'project': 'CheckCircle2',
+    'task': 'Plus',
+    'invoice': 'FileText',
+    'payment': 'DollarSign',
+    'time': 'Clock',
+    'default': 'Activity'
+  };
+  return iconMap[activityType] || iconMap.default;
+};
+
+// Helper function to get activity icon color
+const getActivityIconColor = (activityType) => {
+  const colorMap = {
+    'client': 'text-emerald-500',
+    'project': 'text-green-500',
+    'task': 'text-blue-500',
+    'invoice': 'text-purple-500',
+    'payment': 'text-yellow-500',
+    'time': 'text-orange-500',
+    'default': 'text-gray-500'
+  };
+  return colorMap[activityType] || colorMap.default;
+};
+
 export const getDashboardData = async () => {
   try {
     // Get real-time metrics
     const metrics = await getRealTimeMetrics();
 
-    // Get recent activity data
-    const recentActivityParams = {
-      fields: [
-        { field: { Name: "Name" } },
-        { field: { Name: "CreatedOn" } },
-        { field: { Name: "CreatedBy" } }
-      ],
-      orderBy: [
-        {
-          fieldName: "CreatedOn",
-          sorttype: "DESC"
-        }
-      ],
-      pagingInfo: {
-        limit: 5,
-        offset: 0
-      }
-    };
-
-    // Get recent clients
-    const recentClientsResponse = await apperClient.fetchRecords("client", recentActivityParams);
-    const recentProjectsResponse = await apperClient.fetchRecords("project", recentActivityParams);
-    const recentTasksResponse = await apperClient.fetchRecords("task", recentActivityParams);
-    const recentInvoicesResponse = await apperClient.fetchRecords("app_invoice", recentActivityParams);
-
-    // Process recent activities
-    const recentActivity = [];
-    
-    // Add recent clients
-    if (recentClientsResponse.success && recentClientsResponse.data) {
-      recentClientsResponse.data.slice(0, 2).forEach(client => {
-        recentActivity.push({
-          id: `client-${client.Id}`,
-          type: "client",
-          title: `New client '${client.Name}' added`,
-          client: client.Name,
-          time: formatTimeAgo(client.CreatedOn),
-          icon: "UserPlus",
-          iconColor: "text-emerald-500"
-        });
-      });
-    }
-
-    // Add recent projects
-    if (recentProjectsResponse.success && recentProjectsResponse.data) {
-      recentProjectsResponse.data.slice(0, 2).forEach(project => {
-        recentActivity.push({
-          id: `project-${project.Id}`,
-          type: "project", 
-          title: `Project '${project.Name}' updated`,
-          client: project.Name,
-          time: formatTimeAgo(project.CreatedOn),
-          icon: "CheckCircle2",
-          iconColor: "text-green-500"
-        });
-      });
-    }
-
-    // Add recent tasks
-    if (recentTasksResponse.success && recentTasksResponse.data) {
-      recentTasksResponse.data.slice(0, 2).forEach(task => {
-        recentActivity.push({
-          id: `task-${task.Id}`,
-          type: "task",
-          title: `Task '${task.Name || task.title}' created`,
-          client: task.Name || task.title,
-          time: formatTimeAgo(task.CreatedOn),
-          icon: "Plus",
-          iconColor: "text-blue-500"
-        });
-      });
-    }
-
-    // Add recent invoices
-    if (recentInvoicesResponse.success && recentInvoicesResponse.data) {
-      recentInvoicesResponse.data.slice(0, 1).forEach(invoice => {
-        recentActivity.push({
-          id: `invoice-${invoice.Id}`,
-          type: "invoice",
-          title: `Invoice '${invoice.Name}' created`,
-          client: invoice.Name,
-          time: formatTimeAgo(invoice.CreatedOn),
-          icon: "FileText", 
-          iconColor: "text-purple-500"
-        });
-      });
-    }
-
-    // Sort activities by time and limit to 5
-    recentActivity.sort((a, b) => new Date(b.time) - new Date(a.time));
-    const limitedActivity = recentActivity.slice(0, 5);
+    // Get real-time activity data
+    const recentActivity = await getRealTimeActivity();
 
     return {
       summary: {
@@ -241,7 +232,7 @@ export const getDashboardData = async () => {
         completedTasks: 0, // Keep for compatibility
         overdueItems: 0 // Keep for compatibility
       },
-      recentActivity: limitedActivity,
+      recentActivity: recentActivity,
       quickStats: {
         projectsThisWeek: metrics.projectCount,
         tasksCompleted: 0,

@@ -2,7 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { setMetricsLoading, setMetrics, setMetricsError } from "@/store/dashboardSlice";
+import { 
+  setMetricsLoading, 
+  setMetrics, 
+  setMetricsError, 
+  setActivityLoading, 
+  setRecentActivity, 
+  setActivityError 
+} from "@/store/dashboardSlice";
 import DashboardStats from "@/components/organisms/DashboardStats";
 import RecentActivity from "@/components/organisms/RecentActivity";
 import QuickActions from "@/components/organisms/QuickActions";
@@ -10,52 +17,70 @@ import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import ApperIcon from "@/components/ApperIcon";
-import { getDashboardData, getRealTimeMetrics } from "@/services/api/dashboardService";
+import { getDashboardData, getRealTimeMetrics, getRealTimeActivity } from "@/services/api/dashboardService";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { metrics, loading: metricsLoading, error: metricsError } = useSelector((state) => state.dashboard);
+  const { 
+    metrics, 
+    loading: metricsLoading, 
+    error: metricsError,
+    recentActivity,
+    activityLoading,
+    activityError
+  } = useSelector((state) => state.dashboard);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const refreshIntervalRef = useRef(null);
 
-  const loadDashboardData = async () => {
+const loadDashboardData = async () => {
     try {
       setLoading(true);
       setError("");
       const dashboardData = await getDashboardData();
       setData(dashboardData);
       
-      // Update metrics in Redux store
+      // Update metrics and activity in Redux store
       if (dashboardData.realTimeMetrics) {
         dispatch(setMetrics(dashboardData.realTimeMetrics));
+      }
+      if (dashboardData.recentActivity) {
+        dispatch(setRecentActivity(dashboardData.recentActivity));
       }
     } catch (err) {
       setError("Failed to load dashboard data. Please try again.");
       toast.error("Failed to load dashboard data");
       dispatch(setMetricsError(err.message));
+      dispatch(setActivityError(err.message));
     } finally {
       setLoading(false);
     }
   };
 
-  const refreshMetrics = async () => {
+  const refreshDashboardData = async () => {
     try {
+      // Refresh metrics
       dispatch(setMetricsLoading(true));
       const realTimeMetrics = await getRealTimeMetrics();
       dispatch(setMetrics(realTimeMetrics));
+
+      // Refresh activity
+      dispatch(setActivityLoading(true));
+      const realTimeActivity = await getRealTimeActivity();
+      dispatch(setRecentActivity(realTimeActivity));
     } catch (err) {
-      console.error("Failed to refresh metrics:", err);
+      console.error("Failed to refresh dashboard data:", err);
       dispatch(setMetricsError(err.message));
+      dispatch(setActivityError(err.message));
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
     loadDashboardData();
     
-    // Set up real-time refresh every 30 seconds
-    refreshIntervalRef.current = setInterval(refreshMetrics, 30000);
+    // Set up real-time refresh every 30 seconds for both metrics and activity
+    refreshIntervalRef.current = setInterval(refreshDashboardData, 30000);
     
     // Cleanup interval on unmount
     return () => {
@@ -101,10 +126,10 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
             Dashboard
           </h1>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <ApperIcon name="RefreshCw" size={14} className={metricsLoading ? "animate-spin" : ""} />
-            <span>Real-time updates</span>
-          </div>
+<div className="flex items-center gap-2 text-sm text-gray-500">
+          <ApperIcon name="RefreshCw" size={14} className={metricsLoading || activityLoading ? "animate-spin" : ""} />
+          <span>Real-time updates</span>
+        </div>
         </div>
         <p className="text-gray-600 dark:text-gray-400">
           Welcome back! Here's an overview of your freelance business with real-time metrics.
@@ -127,7 +152,7 @@ const Dashboard = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
-        <RecentActivity recentActivity={data?.recentActivity} />
+<RecentActivity recentActivity={recentActivity} />
         <QuickActions />
       </motion.div>
     </div>

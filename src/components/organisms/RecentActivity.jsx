@@ -1,12 +1,17 @@
 import React from "react";
 import { motion } from "framer-motion";
-import Card from "@/components/atoms/Card";
-import Badge from "@/components/atoms/Badge";
+import { useSelector } from "react-redux";
 import ApperIcon from "@/components/ApperIcon";
-
-const RecentActivity = ({ recentActivity }) => {
+import Badge from "@/components/atoms/Badge";
+import Card from "@/components/atoms/Card";
+const RecentActivity = ({ recentActivity: propRecentActivity }) => {
+  const { recentActivity, activityLoading, activityError } = useSelector((state) => state.dashboard);
+  
+  // Use Redux data if available, otherwise fall back to prop data
+  const displayActivity = recentActivity?.length > 0 ? recentActivity : propRecentActivity;
+  
   // Handle case where activity data is not yet loaded
-  if (!recentActivity || recentActivity.length === 0) {
+if (!displayActivity || displayActivity.length === 0) {
     return (
       <Card className="h-full">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -14,35 +19,19 @@ const RecentActivity = ({ recentActivity }) => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Recent Activity
             </h3>
-            <Badge variant="primary">Live</Badge>
+            <div className="flex items-center gap-2">
+              {activityLoading && <ApperIcon name="RefreshCw" size={14} className="animate-spin text-primary-500" />}
+              <Badge variant="primary">Live</Badge>
+            </div>
           </div>
         </div>
         
-        <div className="p-6">
+<div className="p-6">
           <div className="space-y-4">
-            {recentActivity ? (
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                <ApperIcon name="Activity" size={48} className="mx-auto mb-4 text-gray-300" />
-                <p>No recent activity to display</p>
-              </div>
-            ) : (
-              // Loading skeleton
-              [...Array(5)].map((_, index) => (
-                <div key={index} className="animate-pulse">
-                  <div className="flex items-start gap-4 p-3">
-                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                        <div className="w-20 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                      </div>
-                      <div className="w-3/4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                      <div className="w-1/2 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+              <ApperIcon name="Activity" size={48} className="mx-auto mb-4 text-gray-300" />
+              <p>No recent activity to display</p>
+            </div>
           </div>
         </div>
       </Card>
@@ -61,19 +50,22 @@ const RecentActivity = ({ recentActivity }) => {
   };
 
   return (
-    <Card className="h-full">
+<Card className="h-full">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Recent Activity
           </h3>
-          <Badge variant="primary">Live</Badge>
+          <div className="flex items-center gap-2">
+            {activityLoading && <ApperIcon name="RefreshCw" size={14} className="animate-spin text-primary-500" />}
+            <Badge variant="primary">Live</Badge>
+          </div>
         </div>
       </div>
       
       <div className="p-6">
         <div className="space-y-4">
-          {recentActivity.map((activity, index) => (
+          {displayActivity.map((activity, index) => (
             <motion.div
               key={activity.id}
               initial={{ opacity: 0, x: -20 }}
