@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
@@ -17,6 +18,7 @@ import { createTask, getAllTasks } from "@/services/api/taskService";
 import { getAllProjects } from "@/services/api/projectService";
 
 const Tasks = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -336,7 +338,11 @@ const getStatusIcon = (status) => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <Card hover className="p-6">
+<Card 
+                  hover 
+                  className="p-6 cursor-pointer"
+                  onClick={() => navigate(`/tasks/${task.Id}`)}
+                >
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 mt-1">
                       <button className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 hover:border-primary-500 transition-colors duration-200">
@@ -353,7 +359,7 @@ const getStatusIcon = (status) => {
                             task.status === "done" ? "line-through opacity-60" : ""
                           }`}>
                             {task.title}
-</h3>
+                          </h3>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             Project: {task.project_id?.Name || task.project_id || 'Unknown'}
                           </p>
@@ -367,7 +373,7 @@ const getStatusIcon = (status) => {
                             {task.priority}
                           </Badge>
                           
-<Badge 
+                          <Badge 
                             variant={getStatusVariant(task.status)}
                             className="flex items-center gap-1"
                           >
@@ -375,26 +381,29 @@ const getStatusIcon = (status) => {
                             {task.status ? task.status.replace("-", " ") : "unknown"}
                           </Badge>
                         </div>
-</div>
+                      </div>
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                           <div className="flex items-center gap-1">
-<ApperIcon name="Calendar" size={14} />
+                            <ApperIcon name="Calendar" size={14} />
                             <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>
                           </div>
-{new Date(task.due_date) < new Date() && task.status !== "done" && (
+                          {new Date(task.due_date) < new Date() && task.status !== "done" && (
                             <Badge variant="danger" className="text-xs">
                               Overdue
                             </Badge>
                           )}
                         </div>
                         
-<div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => toast.info("Task editing is available through the Project detail page.")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/tasks/${task.Id}`);
+                            }}
                           >
                             <ApperIcon name="Edit2" size={14} />
                           </Button>
@@ -427,7 +436,8 @@ const getStatusIcon = (status) => {
                         <Button
                           variant={activeTimers.has(task.Id) ? "error" : "primary"}
                           size="sm"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (activeTimers.has(task.Id)) {
                               handleStopTimer(task.Id);
                             } else {

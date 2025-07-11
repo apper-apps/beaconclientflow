@@ -193,7 +193,10 @@ useEffect(() => {
                               snapshot.isDragging ? "rotate-2 scale-105" : ""
                             } transition-transform duration-200`}
                           >
-<Card className="p-4 cursor-move hover:shadow-md transition-shadow duration-200">
+<Card 
+                              className="p-4 cursor-pointer hover:shadow-md transition-shadow duration-200"
+                              onClick={() => window.location.href = `/tasks/${task.Id}`}
+                            >
                               <div className="space-y-3">
                                 <div className="flex items-start justify-between gap-2">
                                   <h4 className="font-medium text-gray-900 dark:text-white text-sm leading-tight">
@@ -211,10 +214,10 @@ useEffect(() => {
 
                                 <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
                                   <div className="flex items-center gap-1">
-<ApperIcon name="Calendar" size={12} />
+                                    <ApperIcon name="Calendar" size={12} />
                                     <span>{formatDate(task.due_date)}</span>
                                   </div>
-{isOverdue(task.due_date) && task.status !== "done" && (
+                                  {isOverdue(task.due_date) && task.status !== "done" && (
                                     <Badge variant="error" size="sm">
                                       Overdue
                                     </Badge>
@@ -232,7 +235,7 @@ useEffect(() => {
                                         </span>
                                       </div>
                                     )}
-{task.total_time > 0 && !activeTimers.has(task.Id) && (
+                                    {task.total_time > 0 && !activeTimers.has(task.Id) && (
                                       <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                                         <ApperIcon name="Clock" size={10} />
                                         <span className="font-mono">
@@ -263,7 +266,7 @@ useEffect(() => {
                                   </Button>
                                 </div>
 
-<div className="text-xs text-gray-500 dark:text-gray-400">
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
                                   Project: {task.project_id?.Name || task.project_id}
                                 </div>
                               </div>

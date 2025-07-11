@@ -17,6 +17,7 @@ import ClientDetail from "@/components/pages/ClientDetail";
 import Projects from "@/components/pages/Projects";
 import ProjectDetail from "@/components/pages/ProjectDetail";
 import Tasks from "@/components/pages/Tasks";
+import TaskDetail from "@/components/pages/TaskDetail";
 import TimeTracking from "@/components/pages/TimeTracking";
 import Invoices from "@/components/pages/Invoices";
 
@@ -265,7 +266,8 @@ const userState = useSelector((state) => state.user);
                 <Route path="/clients/:id" element={<ClientDetail />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/projects/:id" element={<ProjectDetail />} />
-                <Route path="/tasks" element={<Tasks />} />
+<Route path="/tasks" element={<Tasks />} />
+                <Route path="/tasks/:id" element={<TaskDetail />} />
                 <Route path="/time-tracking" element={<TimeTracking />} />
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/callback" element={<Callback />} />
