@@ -137,7 +137,54 @@ export const getRealTimeMetrics = async () => {
   }
 };
 
-// Get real-time recent activity data
+// Log activity to the recent_activity table
+export const logActivity = async (activityData) => {
+  try {
+    const { type, entityId, entityName, entityType, description, userId, clientId, projectId, taskId, invoiceId } = activityData;
+    
+    const activityRecord = {
+      Name: `${type} ${entityType}`,
+      activity_type: type,
+      description: description || `${type} operation on ${entityType}: ${entityName}`,
+      activity_timestamp: new Date().toISOString(),
+      client_id: clientId || null,
+      project_id: projectId || null,
+      task_id: taskId || null,
+      invoice_id: invoiceId || null,
+      Owner: userId || null
+    };
+
+    // Remove null values to avoid sending unnecessary fields
+    const cleanedRecord = Object.fromEntries(
+      Object.entries(activityRecord).filter(([_, v]) => v != null)
+    );
+
+    const params = {
+      records: [cleanedRecord]
+    };
+
+    const response = await apperClient.createRecord("recent_activity", params);
+    
+    if (!response.success) {
+      console.error("Failed to log activity:", response.message);
+      return false;
+    }
+
+    if (response.results) {
+      const failedRecords = response.results.filter(result => !result.success);
+      if (failedRecords.length > 0) {
+        console.error(`Failed to log activity:${JSON.stringify(failedRecords)}`);
+        return false;
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error logging activity:", error);
+    return false;
+  }
+};
+
 // Get real-time recent activity data
 export const getRealTimeActivity = async () => {
   try {
@@ -197,7 +244,7 @@ export const getRealTimeActivity = async () => {
 
     return activities;
 
-} catch (error) {
+  } catch (error) {
     console.error("Error fetching real-time activity:", error);
     throw new Error(`Failed to fetch real-time activity: ${error.message}`);
   }
