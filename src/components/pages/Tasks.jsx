@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import KanbanBoard from "@/components/organisms/KanbanBoard";
 import ApperIcon from "@/components/ApperIcon";
+import KanbanBoard from "@/components/organisms/KanbanBoard";
 import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import Card from "@/components/atoms/Card";
+import Input from "@/components/atoms/Input";
+import Modal from "@/components/atoms/Modal";
 import Empty from "@/components/ui/Empty";
 import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import SearchBar from "@/components/molecules/SearchBar";
-import { getAllTasks } from "@/services/api/taskService";
 import { startTimer, stopTimer } from "@/services/api/timeTrackingService";
+import { createTask, getAllTasks } from "@/services/api/taskService";
 
 const Tasks = () => {
 const [tasks, setTasks] = useState([]);
@@ -23,6 +25,16 @@ const [tasks, setTasks] = useState([]);
   const [viewMode, setViewMode] = useState("list");
   const [activeTimers, setActiveTimers] = useState(new Map());
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [taskFormData, setTaskFormData] = useState({
+    title: "",
+    description: "",
+    priority: "medium",
+    status: "todo",
+    dueDate: "",
+    projectId: ""
+  });
+  const [isCreating, setIsCreating] = useState(false);
   const loadTasks = async () => {
     try {
       setLoading(true);
@@ -205,7 +217,7 @@ const getStatusIcon = (status) => {
               <ApperIcon name="List" size={14} className="mr-1" />
               List
             </Button>
-            <Button
+<Button
               variant={viewMode === "kanban" ? "primary" : "ghost"}
               size="sm"
               onClick={() => setViewMode("kanban")}
@@ -214,14 +226,16 @@ const getStatusIcon = (status) => {
               <ApperIcon name="Columns" size={14} className="mr-1" />
               Kanban
             </Button>
-</div>
-          <Button 
-            variant="primary"
-            onClick={() => toast.info("Task creation will be available soon. For now, tasks are managed through projects.")}
-          >
-            <ApperIcon name="Plus" size={16} className="mr-2" />
-            Add Task
-          </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="primary"
+              onClick={() => setShowTaskModal(true)}
+            >
+              <ApperIcon name="Plus" size={16} className="mr-2" />
+              Add Task
+            </Button>
+          </div>
         </div>
       </motion.div>
 
@@ -436,8 +450,207 @@ const getStatusIcon = (status) => {
               />
             </motion.div>
 )}
-        </>
+</>
       )}
+
+      {/* Task Creation Modal */}
+      <Modal
+        isOpen={showTaskModal}
+        onClose={() => {
+          setShowTaskModal(false);
+          setTaskFormData({
+            title: "",
+            description: "",
+            priority: "medium",
+            status: "todo",
+            dueDate: "",
+            projectId: ""
+          });
+        }}
+        title="Create New Task"
+        maxWidth="md"
+      >
+        <form 
+          onSubmit={async (e) => {
+            e.preventDefault();
+            
+            if (!taskFormData.title.trim()) {
+              toast.error("Please enter a task title");
+              return;
+            }
+            
+            if (!taskFormData.dueDate) {
+              toast.error("Please select a due date");
+              return;
+            }
+            
+            try {
+              setIsCreating(true);
+              const newTask = await createTask({
+                ...taskFormData,
+                title: taskFormData.title.trim(),
+                description: taskFormData.description.trim(),
+                dueDate: taskFormData.dueDate,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                timeTracking: {
+                  totalTime: 0,
+                  activeTimer: null,
+                  timeLogs: []
+                }
+              });
+              
+              setTasks(prev => [...prev, newTask]);
+              setShowTaskModal(false);
+              setTaskFormData({
+                title: "",
+                description: "",
+                priority: "medium",
+                status: "todo",
+                dueDate: "",
+                projectId: ""
+              });
+              
+              toast.success("Task created successfully!");
+            } catch (error) {
+              console.error("Error creating task:", error);
+              toast.error("Failed to create task. Please try again.");
+            } finally {
+              setIsCreating(false);
+            }
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Task Title *
+            </label>
+            <Input
+              id="title"
+              type="text"
+              value={taskFormData.title}
+              onChange={(e) => setTaskFormData(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="Enter task title"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Description
+            </label>
+            <textarea
+              id="description"
+              value={taskFormData.description}
+              onChange={(e) => setTaskFormData(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Enter task description"
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Priority
+              </label>
+              <select
+                id="priority"
+                value={taskFormData.priority}
+                onChange={(e) => setTaskFormData(prev => ({ ...prev, priority: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Status
+              </label>
+              <select
+                id="status"
+                value={taskFormData.status}
+                onChange={(e) => setTaskFormData(prev => ({ ...prev, status: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="todo">To Do</option>
+                <option value="in-progress">In Progress</option>
+                <option value="review">Review</option>
+                <option value="done">Done</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Due Date *
+              </label>
+              <Input
+                id="dueDate"
+                type="date"
+                value={taskFormData.dueDate}
+                onChange={(e) => setTaskFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Project ID
+              </label>
+              <Input
+                id="projectId"
+                type="text"
+                value={taskFormData.projectId}
+                onChange={(e) => setTaskFormData(prev => ({ ...prev, projectId: e.target.value }))}
+                placeholder="Enter project ID"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowTaskModal(false);
+                setTaskFormData({
+                  title: "",
+                  description: "",
+                  priority: "medium",
+                  status: "todo",
+                  dueDate: "",
+                  projectId: ""
+                });
+              }}
+              disabled={isCreating}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isCreating}
+            >
+              {isCreating ? (
+                <>
+                  <ApperIcon name="Loader2" size={16} className="mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <ApperIcon name="Plus" size={16} className="mr-2" />
+                  Create Task
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
