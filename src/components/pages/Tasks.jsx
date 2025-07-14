@@ -603,18 +603,20 @@ if (!taskFormData.title.trim()) {
               toast.error("Please select a project");
               return;
             }
-            try {
+try {
               setIsCreating(true);
-const newTask = await createTask({
+              const newTask = await createTask({
                 title: taskFormData.title.trim(),
                 description: taskFormData.description.trim(),
                 dueDate: taskFormData.dueDate,
                 projectId: parseInt(taskFormData.projectId),
               });
               
-              setTasks(prev => [...prev, newTask]);
+              // Reload tasks to get properly resolved lookup values
+              await loadTasks();
+              
               setShowTaskModal(false);
-setTaskFormData({
+              setTaskFormData({
                 title: "",
                 description: "",
                 priority: "medium",
