@@ -105,8 +105,7 @@ Name: taskData.name || taskData.title,
         }
       ]
     };
-
-    const response = await apperClient.createRecord("task", params);
+const response = await apperClient.createRecord("task", params);
     
     if (!response.success) {
       console.error(response.message);
@@ -117,29 +116,32 @@ Name: taskData.name || taskData.title,
       const successfulRecords = response.results.filter(result => result.success);
       const failedRecords = response.results.filter(result => !result.success);
       
-if (failedRecords.length > 0) {
+      if (failedRecords.length > 0) {
         console.error(`Failed to create ${failedRecords.length} records: ${JSON.stringify(failedRecords)}`);
         throw new Error(failedRecords[0].message || "Failed to create task");
       }
       
       const createdTask = successfulRecords[0].data;
       
+      // Fetch the complete task data with lookup fields resolved
+      const completeTaskData = await getTaskById(createdTask.Id);
+      
       // Log activity for task creation
       try {
         const { logUserActivity } = await import('./recentActivityService');
         await logUserActivity({
           type: 'Created',
-          entityName: createdTask.Name || createdTask.title,
+          entityName: completeTaskData.Name || completeTaskData.title,
           entityType: 'Task',
-          description: `New task "${createdTask.Name || createdTask.title}" has been created`,
-          projectId: createdTask.project_id,
-          taskId: createdTask.Id
+          description: `New task "${completeTaskData.Name || completeTaskData.title}" has been created`,
+          projectId: completeTaskData.project_id,
+          taskId: completeTaskData.Id
         });
       } catch (activityError) {
         console.error('Failed to log task creation activity:', activityError);
       }
       
-      return createdTask;
+      return completeTaskData;
     }
   } catch (error) {
     console.error("Error creating task:", error);
