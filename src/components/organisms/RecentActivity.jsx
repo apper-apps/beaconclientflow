@@ -16,20 +16,21 @@ const RecentActivity = ({ recentActivity: propRecentActivity }) => {
   // Use Redux data if available, otherwise fall back to prop data
   const displayActivity = recentActivity?.length > 0 ? recentActivity : (propRecentActivity || []);
 
-  const handleActivityClick = (activity) => {
+const handleActivityClick = (activity) => {
     try {
       // Determine navigation target based on activity type and entity IDs
-      if (activity.client_id) {
-        navigate(`/clients/${activity.client_id}`);
+      // Extract Id from lookup field objects (client_id: {Id: 123, Name: "Client Name"})
+      if (activity.client_id?.Id) {
+        navigate(`/clients/${activity.client_id.Id}`);
         toast.success("Navigating to client details");
-      } else if (activity.project_id) {
-        navigate(`/projects/${activity.project_id}`);
+      } else if (activity.project_id?.Id) {
+        navigate(`/projects/${activity.project_id.Id}`);
         toast.success("Navigating to project details");
-      } else if (activity.task_id) {
-        navigate(`/tasks/${activity.task_id}`);
+      } else if (activity.task_id?.Id) {
+        navigate(`/tasks/${activity.task_id.Id}`);
         toast.success("Navigating to task details");
-      } else if (activity.invoice_id) {
-        navigate(`/invoices/${activity.invoice_id}`);
+      } else if (activity.invoice_id?.Id) {
+        navigate(`/invoices/${activity.invoice_id.Id}`);
         toast.success("Navigating to invoice details");
       } else {
         // For activities without specific entity associations, could show modal or general activity view
