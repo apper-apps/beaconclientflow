@@ -265,8 +265,9 @@ useEffect(() => {
                                     {activeTimers.has(task.Id) ? "Stop" : "Start"}
                                   </Button>
                                 </div>
-<div className="text-xs text-gray-500 dark:text-gray-400">
-                                  Project: {typeof task.project_id === 'object' && task.project_id?.Name ? task.project_id.Name : (typeof task.project_id === 'string' || typeof task.project_id === 'number' ? String(task.project_id) : 'Unknown')}
+
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  Project: {task.project_id?.Name || task.project_id}
                                 </div>
                               </div>
                             </Card>

@@ -297,9 +297,9 @@ const TaskDetail = () => {
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {task.title}
-</h2>
+                </h2>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Project: {typeof task.project_id === 'object' && task.project_id?.Name ? task.project_id.Name : (typeof task.project_id === 'string' || typeof task.project_id === 'number' ? String(task.project_id) : 'Unknown')}
+                  Project: {task.project_id?.Name || task.project_id || 'Unknown'}
                 </p>
               </div>
               <div className="flex items-center gap-2">
