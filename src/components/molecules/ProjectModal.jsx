@@ -42,7 +42,7 @@ const ProjectModal = ({
       setFormData({
         name: project.Name || '',
         description: project.description || '',
-        clientId: project.client_id || '',
+        clientId: project.client_id?.Id || project.client_id || '',
         status: project.status || 'planning',
         budget: project.budget || '',
         startDate: project.start_date || '',
