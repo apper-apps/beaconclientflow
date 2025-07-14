@@ -40,13 +40,13 @@ const ProjectModal = ({
   useEffect(() => {
     if (project) {
       setFormData({
-        name: project.name || '',
+        name: project.Name || '',
         description: project.description || '',
-        clientId: project.clientId || '',
+        clientId: project.client_id || '',
         status: project.status || 'planning',
         budget: project.budget || '',
-        startDate: project.startDate || '',
-        endDate: project.endDate || ''
+        startDate: project.start_date || '',
+        endDate: project.end_date || ''
       });
     } else {
       setFormData({
