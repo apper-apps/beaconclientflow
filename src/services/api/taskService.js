@@ -272,7 +272,45 @@ export const deleteTask = async (id) => {
 
 export const startTaskTimer = async (id) => {
   try {
+export const startTaskTimer = async (id) => {
+  try {
     const now = new Date().toISOString();
+    
+    const params = {
+      records: [
+        {
+          Id: parseInt(id),
+          active_timer: now
+        }
+      ]
+    };
+
+    const response = await apperClient.updateRecord("task", params);
+    
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successfulUpdates = response.results.filter(result => result.success);
+      const failedUpdates = response.results.filter(result => !result.success);
+      
+      if (failedUpdates.length > 0) {
+        console.error(`Failed to start timer for ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+        throw new Error(failedUpdates[0].message || "Failed to start timer");
+      }
+      
+      return {
+        Id: parseInt(id),
+        startTime: now
+      };
+    }
+  } catch (error) {
+    console.error("Error starting timer:", error);
+    throw new Error(`Failed to start timer: ${error.message}`);
+  }
+};
     const params = {
       records: [
         {
