@@ -13,7 +13,7 @@ import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import SearchBar from "@/components/molecules/SearchBar";
 import ProjectModal from "@/components/molecules/ProjectModal";
-import { createProject, getAllProjects, updateProject } from "@/services/api/projectService";
+import { createProject, getAllProjects, updateProject, deleteProject } from "@/services/api/projectService";
 import { getAllClients } from "@/services/api/clientService";
 const Projects = () => {
   const navigate = useNavigate();
@@ -294,8 +294,24 @@ actionLabel="Create Project"
                   >
                     <ApperIcon name="Edit2" size={14} />
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    <ApperIcon name="MoreHorizontal" size={14} />
+<Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (window.confirm(`Are you sure you want to delete "${project.Name || project.name || 'this project'}"? This action cannot be undone.`)) {
+                        try {
+                          await deleteProject(project.Id);
+                          setProjects(prev => prev.filter(p => p.Id !== project.Id));
+                          toast.success("Project deleted successfully");
+                        } catch (error) {
+                          console.error("Error deleting project:", error);
+                          toast.error("Failed to delete project");
+                        }
+                      }
+                    }}
+                  >
+                    <ApperIcon name="Trash2" size={14} />
                   </Button>
                 </div>
               </div>

@@ -14,7 +14,7 @@ import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import SearchBar from "@/components/molecules/SearchBar";
 import { startTimer, stopTimer } from "@/services/api/timeTrackingService";
-import { createTask, getAllTasks } from "@/services/api/taskService";
+import { createTask, getAllTasks, deleteTask } from "@/services/api/taskService";
 import { getAllProjects } from "@/services/api/projectService";
 
 const Tasks = () => {
@@ -407,8 +407,24 @@ const getStatusIcon = (status) => {
                           >
                             <ApperIcon name="Edit2" size={14} />
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <ApperIcon name="MoreHorizontal" size={14} />
+<Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Are you sure you want to delete "${task.title || task.Name || 'this task'}"? This action cannot be undone.`)) {
+                                try {
+                                  await deleteTask(task.Id);
+                                  setTasks(prev => prev.filter(t => t.Id !== task.Id));
+                                  toast.success("Task deleted successfully");
+                                } catch (error) {
+                                  console.error("Error deleting task:", error);
+                                  toast.error("Failed to delete task");
+                                }
+                              }
+                            }}
+                          >
+                            <ApperIcon name="Trash2" size={14} />
                           </Button>
                         </div>
                       </div>
