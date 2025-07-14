@@ -17,9 +17,10 @@ const Clients = () => {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const loadClients = async () => {
     try {
       setLoading(true);
@@ -52,6 +53,64 @@ const handleClientCreated = (newClient) => {
     } catch (error) {
       console.error("Error deleting client:", error);
       toast.error("Failed to delete client. Please try again.");
+    }
+};
+
+  const handleExportClients = async () => {
+    try {
+      setIsExporting(true);
+      
+      if (!clients || clients.length === 0) {
+        toast.error("No clients to export");
+        return;
+      }
+
+      // Create CSV headers
+      const headers = ["Name", "Email", "Company", "Status", "Created Date", "Tags"];
+      
+      // Convert clients data to CSV format
+      const csvData = clients.map(client => [
+        client.Name || "",
+        client.email || "",
+        client.company || "",
+        client.status || "",
+        client.createdAt ? new Date(client.createdAt).toLocaleDateString() : "",
+        client.Tags || ""
+      ]);
+
+      // Combine headers and data
+      const csvContent = [headers, ...csvData]
+        .map(row => 
+          row.map(field => 
+            // Escape quotes and wrap in quotes if contains comma, quote, or newline
+            typeof field === 'string' && (field.includes(',') || field.includes('"') || field.includes('\n'))
+              ? `"${field.replace(/"/g, '""')}"` 
+              : field
+          ).join(',')
+        )
+        .join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `clients_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      URL.revokeObjectURL(url);
+      toast.success(`Successfully exported ${clients.length} clients`);
+      
+    } catch (error) {
+      console.error("Error exporting clients:", error);
+      toast.error("Failed to export clients. Please try again.");
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -137,9 +196,14 @@ const filteredClients = clients.filter(client =>
             <ApperIcon name="Filter" size={16} className="mr-2" />
             Filter
           </Button>
-          <Button variant="outline" size="sm">
+<Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleExportClients}
+            disabled={isExporting || clients.length === 0}
+          >
             <ApperIcon name="Download" size={16} className="mr-2" />
-            Export
+            {isExporting ? "Exporting..." : "Export"}
           </Button>
         </div>
       </motion.div>
