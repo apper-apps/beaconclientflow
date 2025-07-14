@@ -12,7 +12,7 @@ import Loading from "@/components/ui/Loading";
 import Projects from "@/components/pages/Projects";
 import ClientModal from "@/components/molecules/ClientModal";
 import { getAllProjects } from "@/services/api/projectService";
-import { getClientById } from "@/services/api/clientService";
+import { deleteClient, getClientById } from "@/services/api/clientService";
 
 const ClientDetail = () => {
   const { id } = useParams();
@@ -48,9 +48,26 @@ const ClientDetail = () => {
     }
   };
 
-  const handleClientUpdated = (updatedClient) => {
+const handleClientUpdated = (updatedClient) => {
     setClient(updatedClient);
     toast.success("Client updated successfully!");
+  };
+
+  const handleDeleteClient = async () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${client.Name}"? This action cannot be undone and will remove all associated projects and data.`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      await deleteClient(client.Id);
+      toast.success(`Client "${client.Name}" deleted successfully`);
+      navigate("/clients");
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      toast.error("Failed to delete client. Please try again.");
+    }
   };
 
   const handleBackToClients = () => {
@@ -145,13 +162,21 @@ const ClientDetail = () => {
             {client.company}
           </p>
         </div>
-        
-        <Button variant="primary" onClick={() => setShowEditModal(true)}>
-          <ApperIcon name="Edit" size={16} className="mr-2" />
-          Edit Client
-        </Button>
+<div className="flex gap-3">
+          <Button variant="primary" onClick={() => setShowEditModal(true)}>
+            <ApperIcon name="Edit" size={16} className="mr-2" />
+            Edit Client
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleDeleteClient}
+            className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400 dark:text-red-400 dark:border-red-600 dark:hover:bg-red-900/20"
+          >
+            <ApperIcon name="Trash2" size={16} className="mr-2" />
+            Delete Client
+          </Button>
+        </div>
       </motion.div>
-
       {/* Client Info and Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Client Information */}

@@ -11,7 +11,7 @@ import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import ApperIcon from "@/components/ApperIcon";
 import ClientModal from "@/components/molecules/ClientModal";
-import { getAllClients } from "@/services/api/clientService";
+import { getAllClients, deleteClient } from "@/services/api/clientService";
 
 const Clients = () => {
   const navigate = useNavigate();
@@ -34,9 +34,26 @@ const Clients = () => {
     }
 };
 
-  const handleClientCreated = (newClient) => {
+const handleClientCreated = (newClient) => {
     setClients(prev => [...prev, newClient]);
-};
+  };
+
+  const handleDeleteClient = async (clientId, clientName) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${clientName}"? This action cannot be undone.`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      await deleteClient(clientId);
+      setClients(prev => prev.filter(client => client.Id !== clientId));
+      toast.success(`Client "${clientName}" deleted successfully`);
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      toast.error("Failed to delete client. Please try again.");
+    }
+  };
 
   const handleClientClick = (clientId) => {
     navigate(`/clients/${clientId}`);
@@ -215,9 +232,13 @@ const filteredClients = clients.filter(client =>
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClient(client.Id, client.Name);
+                      }}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                     >
-                      <ApperIcon name="MoreHorizontal" size={16} />
+                      <ApperIcon name="Trash2" size={14} />
                     </Button>
                   </div>
                 </div>
