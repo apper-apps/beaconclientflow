@@ -309,10 +309,10 @@ export const getRecentActivities = async () => {
   try {
     const activities = await getAll();
     
-    // Format activities for display
+// Format activities for display
     const formattedActivities = activities.map(activity => {
       const activityType = activity.activity_type || "activity";
-      const timestamp = activity.activity_timestamp || activity.ModifiedOn || activity.CreatedOn;
+      const timestamp = activity.CreatedOn || activity.ModifiedOn || activity.activity_timestamp;
       
       return {
         id: activity.Id,
