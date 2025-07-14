@@ -206,14 +206,13 @@ const getStatusIcon = (status) => {
         "Created On"
       ];
 
-      // Convert tasks to CSV rows
+// Convert tasks to CSV rows
       const csvRows = filteredTasks.map(task => {
         const projectName = typeof task.project_id === 'object' && task.project_id?.Name 
           ? task.project_id.Name 
           : (typeof task.project_id === 'string' || typeof task.project_id === 'number' 
             ? String(task.project_id) 
             : 'Unknown');
-        
         const totalTimeHours = task.total_time 
           ? (task.total_time / 3600000).toFixed(2) // Convert milliseconds to hours
           : '0.00';
@@ -429,7 +428,7 @@ const getStatusIcon = (status) => {
                             task.status === "done" ? "line-through opacity-60" : ""
 }`}>
                             {task.title}
-                          </h3>
+</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             Project: {typeof task.project_id === 'object' && task.project_id?.Name ? task.project_id.Name : (typeof task.project_id === 'string' || typeof task.project_id === 'number' ? String(task.project_id) : 'Unknown')}
                           </p>
