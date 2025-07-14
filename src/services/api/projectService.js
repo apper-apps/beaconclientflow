@@ -1,3 +1,6 @@
+import React from "react";
+import Error from "@/components/ui/Error";
+import { logUserActivity } from "@/services/api/recentActivityService";
 const { ApperClient } = window.ApperSDK;
 const apperClient = new ApperClient({
   apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
@@ -40,7 +43,7 @@ fields: [
     }
 
     return response.data || [];
-  } catch (error) {
+} catch (error) {
     console.error("Error fetching projects:", error);
     throw new Error(`Failed to fetch projects: ${error.message}`);
   }
@@ -49,18 +52,18 @@ fields: [
 export const getProjectById = async (id) => {
   try {
     const params = {
-fields: [
+      fields: [
         { field: { Name: "Name" } },
         { field: { Name: "status" } },
         { field: { Name: "budget" } },
         { field: { Name: "start_date" } },
         { field: { Name: "end_date" } },
         { field: { Name: "description" } },
+        { field: { Name: "Tags" } },
         { 
           field: { Name: "client_id" },
           referenceField: { field: { Name: "Name" } }
-        },
-        { field: { Name: "Tags" } }
+        }
       ]
     };
 

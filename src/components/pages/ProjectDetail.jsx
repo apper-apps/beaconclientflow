@@ -15,13 +15,11 @@ import ProjectModal from "@/components/molecules/ProjectModal";
 import { getProjectTimeTracking } from "@/services/api/timeTrackingService";
 import { deleteProject, getProjectById, updateProject } from "@/services/api/projectService";
 import { getAllTasks } from "@/services/api/taskService";
-import { getAllClients } from "@/services/api/clientService";
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 const [project, setProject] = useState(null);
-  const [client, setClient] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [projectTimeTracking, setProjectTimeTracking] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,18 +40,13 @@ const loadProjectDetails = async () => {
       setLoading(true);
       setError("");
       
-      const [projectData, clientsData, tasksData, timeTrackingData] = await Promise.all([
+      const [projectData, tasksData, timeTrackingData] = await Promise.all([
         getProjectById(id),
-        getAllClients(),
         getAllTasks(),
         getProjectTimeTracking(id)
       ]);
 
       setProject(projectData);
-      
-      // Find the client for this project
-      const projectClient = clientsData.find(c => c.Id === parseInt(projectData.client_id));
-      setClient(projectClient);
       
       // Filter tasks for this project - ensures real-time updates
       const projectTasks = tasksData.filter(t => t.project_id === String(projectData.Id));
@@ -253,8 +246,8 @@ const getDaysRemaining = () => {
 <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                 {project.Name}
 </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                {client?.Name || "Client not found"}
+<p className="text-gray-600 dark:text-gray-400">
+                {project.client_id?.Name || "Client not found"}
               </p>
             </div>
           </div>
@@ -513,8 +506,8 @@ const getDaysRemaining = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Client
 </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {client?.Name || "Client not found"}
+<p className="text-gray-900 dark:text-white">
+                    {project.client_id?.Name || "Client not found"}
                   </p>
                 </div>
                 <div>
