@@ -108,6 +108,66 @@ const filteredProjects = projects.filter(project => {
     return icons[status] || "Circle";
   };
 
+const handleExport = () => {
+    try {
+      // Create CSV headers
+      const headers = [
+        'Name',
+        'Client',
+        'Status',
+        'Budget',
+        'Start Date',
+        'End Date',
+        'Description',
+        'Tags'
+      ];
+
+      // Transform filtered projects to CSV rows
+      const csvRows = filteredProjects.map(project => {
+        return [
+          project.Name || project.name || 'Unnamed Project',
+          getClientName(project.client_id),
+          project.status || 'Not set',
+          project.budget ? `$${project.budget.toLocaleString()}` : '$0',
+          project.start_date ? new Date(project.start_date).toLocaleDateString() : 'Not set',
+          project.end_date ? new Date(project.end_date).toLocaleDateString() : 'Not set',
+          project.description || 'No description',
+          project.Tags || 'No tags'
+        ];
+      });
+
+      // Combine headers and rows
+      const csvContent = [headers, ...csvRows]
+        .map(row => 
+          row.map(cell => 
+            // Escape quotes and wrap in quotes if contains comma, quote, or newline
+            typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\n'))
+              ? `"${cell.replace(/"/g, '""')}"` 
+              : cell
+          ).join(',')
+        )
+        .join('\n');
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `projects_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success(`Exported ${filteredProjects.length} projects to CSV`);
+    } catch (error) {
+      console.error('Error exporting projects:', error);
+      toast.error('Failed to export projects');
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -184,7 +244,7 @@ actionLabel="Create Project"
             <option value="on-hold">On Hold</option>
           </select>
           
-          <Button variant="outline" size="sm">
+<Button variant="outline" size="sm" onClick={handleExport}>
             <ApperIcon name="Download" size={16} className="mr-2" />
             Export
           </Button>
