@@ -608,6 +608,8 @@ try {
               const newTask = await createTask({
                 title: taskFormData.title.trim(),
                 description: taskFormData.description.trim(),
+                priority: taskFormData.priority,
+                status: taskFormData.status,
                 dueDate: taskFormData.dueDate,
                 projectId: parseInt(taskFormData.projectId),
               });

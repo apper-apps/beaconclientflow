@@ -89,13 +89,13 @@ export const getTaskById = async (id) => {
 
 export const createTask = async (taskData) => {
   try {
-    const params = {
+const params = {
       records: [
         {
-Name: taskData.name || taskData.title,
+          Name: taskData.name || taskData.title,
           title: taskData.title,
-          priority: taskData.priority,
-          status: taskData.status,
+          priority: taskData.priority || "medium",
+          status: taskData.status || "todo",
           due_date: taskData.dueDate,
           total_time: 0,
           active_timer: String(taskData.active_timer || ""),
