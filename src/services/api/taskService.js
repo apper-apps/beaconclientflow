@@ -152,14 +152,13 @@ export const updateTask = async (id, taskData) => {
           status: taskData.status,
           due_date: taskData.dueDate,
           total_time: taskData.total_time || 0,
-          active_timer: taskData.active_timer || "",
-          time_tracking: taskData.time_tracking || "",
+          active_timer: String(taskData.active_timer || ""),
+          time_tracking: String(taskData.time_tracking || ""),
           project_id: parseInt(taskData.projectId) || 0,
           Tags: taskData.tags || ""
         }
       ]
     };
-
     const response = await apperClient.updateRecord("task", params);
     
     if (!response.success) {
