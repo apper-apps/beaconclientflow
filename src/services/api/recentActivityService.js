@@ -379,6 +379,80 @@ const formatTimeAgo = (dateString) => {
   } else if (diffDays < 7) {
     return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
   } else {
-    return date.toLocaleDateString();
+return date.toLocaleDateString();
   }
+};
+
+// Real-time activity polling and management
+export const startRealTimeActivityPolling = (dispatch, interval = 10000) => {
+  const pollActivity = async () => {
+    try {
+      const activities = await getRecentActivities();
+      dispatch({ type: 'dashboard/refreshRecentActivity', payload: activities });
+    } catch (error) {
+      console.error('Real-time activity polling error:', error);
+    }
+  };
+  
+  return setInterval(pollActivity, interval);
+};
+
+// Helper function to trigger immediate activity refresh
+export const triggerActivityRefresh = async (dispatch) => {
+  try {
+    const activities = await getRecentActivities();
+    if (dispatch) {
+      dispatch({ type: 'dashboard/refreshRecentActivity', payload: activities });
+    }
+    return activities;
+  } catch (error) {
+    console.error('Error triggering activity refresh:', error);
+    throw error;
+  }
+};
+
+// Enhanced activity logging that triggers real-time updates
+export const logAndRefreshActivity = async (activityData, dispatch = null) => {
+  try {
+    // Log the activity
+    const newActivity = await logUserActivity(activityData);
+    
+    // Trigger immediate refresh if dispatch is available
+    if (dispatch) {
+      await triggerActivityRefresh(dispatch);
+    }
+    
+    return newActivity;
+  } catch (error) {
+    console.error('Error logging and refreshing activity:', error);
+    throw error;
+  }
+};
+
+// Auto-refresh activity when user performs CRUD operations
+export const withActivityLogging = (originalFunction, activityData) => {
+  return async (...args) => {
+    try {
+      // Execute original function
+      const result = await originalFunction(...args);
+      
+      // Log activity in background (don't block main operation)
+      logUserActivity(activityData).catch(error => {
+        console.error('Background activity logging failed:', error);
+      });
+      
+      return result;
+    } catch (error) {
+      // Still try to log the failed attempt
+      logUserActivity({
+        ...activityData,
+        type: 'Failed ' + activityData.type,
+        description: `Failed to ${activityData.type.toLowerCase()}: ${error.message}`
+      }).catch(logError => {
+        console.error('Failed to log error activity:', logError);
+      });
+      
+      throw error;
+    }
+  };
 };

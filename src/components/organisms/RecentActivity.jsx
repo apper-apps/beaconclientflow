@@ -9,9 +9,18 @@ import Card from "@/components/atoms/Card";
 import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import { getAll, getRecentActivities } from "@/services/api/recentActivityService";
+import useRealTimeActivity from "@/hooks/useRealTimeActivity";
+
 const RecentActivity = ({ recentActivity: propRecentActivity }) => {
   const navigate = useNavigate();
-  const { recentActivity, activityLoading, activityError } = useSelector((state) => state.dashboard);
+  const { recentActivity, activityLoading, activityError, realTimePolling } = useSelector((state) => state.dashboard);
+  
+  // Initialize real-time activity updates
+  const { refreshNow } = useRealTimeActivity({
+    enabled: true,
+    pollingInterval: 10000, // 10 seconds for activity updates
+    immediate: true
+  });
   
   // Use Redux data if available, otherwise fall back to prop data
   const displayActivity = recentActivity?.length > 0 ? recentActivity : (propRecentActivity || []);
@@ -42,7 +51,7 @@ const handleActivityClick = (activity) => {
     }
   };
   
-  // Show loading state
+// Show loading state
   if (activityLoading && (!displayActivity || displayActivity.length === 0)) {
     return (
       <Card className="h-full">
@@ -121,9 +130,21 @@ const handleActivityClick = (activity) => {
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Recent Activity
           </h3>
-          <div className="flex items-center gap-2">
-            {activityLoading && <ApperIcon name="RefreshCw" size={14} className="animate-spin text-primary-500" />}
-            <Badge variant="primary">Live</Badge>
+<div className="flex items-center gap-2">
+            {(activityLoading || realTimePolling) && <ApperIcon name="RefreshCw" size={14} className="animate-spin text-primary-500" />}
+            <Badge variant="primary" className="relative">
+              Live
+              {realTimePolling && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              )}
+            </Badge>
+            <button 
+              onClick={refreshNow}
+              className="text-xs text-gray-500 hover:text-primary-500 transition-colors"
+              title="Refresh now"
+            >
+              <ApperIcon name="RotateCcw" size={12} />
+            </button>
           </div>
         </div>
       </div>

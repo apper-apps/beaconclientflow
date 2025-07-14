@@ -14,6 +14,8 @@ const initialState = {
 recentActivity: [],
   activityLoading: false,
   activityError: null,
+  realTimePolling: false,
+  lastActivityUpdate: null,
   selectedActivity: null,
   selectedActivityLoading: false,
   selectedActivityError: null,
@@ -68,16 +70,29 @@ reducers: {
       state.activityError = action.payload;
       state.activityLoading = false;
 },
-    addRecentActivity: (state, action) => {
+addRecentActivity: (state, action) => {
       state.recentActivity.unshift(action.payload);
       if (state.recentActivity.length > 10) {
         state.recentActivity = state.recentActivity.slice(0, 10);
       }
+      state.lastActivityUpdate = new Date().toISOString();
     },
     updateRecentActivity: (state, action) => {
       const index = state.recentActivity.findIndex(item => item.id === action.payload.id);
       if (index !== -1) {
         state.recentActivity[index] = action.payload;
+      }
+      state.lastActivityUpdate = new Date().toISOString();
+    },
+    setRealTimePolling: (state, action) => {
+      state.realTimePolling = action.payload;
+    },
+    refreshRecentActivity: (state, action) => {
+      if (action.payload && action.payload.length > 0) {
+        state.recentActivity = action.payload;
+        state.activityLoading = false;
+        state.activityError = null;
+        state.lastActivityUpdate = new Date().toISOString();
       }
     },
     setSelectedActivity: (state, action) => {
@@ -123,6 +138,8 @@ export const {
 setActivityError,
   addRecentActivity,
   updateRecentActivity,
+  setRealTimePolling,
+  refreshRecentActivity,
   setSelectedActivity,
   setSelectedActivityLoading,
   setSelectedActivityError,
@@ -130,5 +147,4 @@ setActivityError,
   clearMetrics,
   clearRecentActivity,
 } = dashboardSlice.actions;
-
 export default dashboardSlice.reducer;

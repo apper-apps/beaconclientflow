@@ -92,8 +92,19 @@ useEffect(() => {
     
     initializeDashboard();
     
-    // Set up real-time refresh every 30 seconds for both metrics and activity
-    refreshIntervalRef.current = setInterval(refreshDashboardData, 30000);
+// Set up real-time refresh every 30 seconds for metrics only
+    // Activity updates are handled by useRealTimeActivity hook in RecentActivity component
+    refreshIntervalRef.current = setInterval(async () => {
+      try {
+        // Refresh metrics only
+        dispatch(setMetricsLoading(true));
+        const realTimeMetrics = await getRealTimeMetrics();
+        dispatch(setMetrics(realTimeMetrics));
+      } catch (err) {
+        console.error("Failed to refresh dashboard metrics:", err);
+        dispatch(setMetricsError(err.message));
+      }
+    }, 30000);
     
     // Cleanup interval on unmount
     return () => {
