@@ -7,14 +7,17 @@ const apperClient = new ApperClient({
 export const getAllProjects = async () => {
   try {
     const params = {
-      fields: [
+fields: [
         { field: { Name: "Name" } },
         { field: { Name: "status" } },
         { field: { Name: "budget" } },
         { field: { Name: "start_date" } },
         { field: { Name: "end_date" } },
         { field: { Name: "description" } },
-        { field: { Name: "client_id" } },
+        { 
+          field: { Name: "client_id" },
+          referenceField: { field: { Name: "Name" } }
+        },
         { field: { Name: "Tags" } }
       ],
       orderBy: [
@@ -46,14 +49,17 @@ export const getAllProjects = async () => {
 export const getProjectById = async (id) => {
   try {
     const params = {
-      fields: [
+fields: [
         { field: { Name: "Name" } },
         { field: { Name: "status" } },
         { field: { Name: "budget" } },
         { field: { Name: "start_date" } },
         { field: { Name: "end_date" } },
         { field: { Name: "description" } },
-        { field: { Name: "client_id" } },
+        { 
+          field: { Name: "client_id" },
+          referenceField: { field: { Name: "Name" } }
+        },
         { field: { Name: "Tags" } }
       ]
     };
