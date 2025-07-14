@@ -92,13 +92,13 @@ export const createTask = async (taskData) => {
       records: [
         {
           Name: taskData.name || taskData.title,
-          title: taskData.title,
+title: taskData.title,
           priority: taskData.priority,
           status: taskData.status,
           due_date: taskData.dueDate,
           total_time: 0,
-          active_timer: "",
-          time_tracking: "",
+          active_timer: String(taskData.active_timer || ""),
+          time_tracking: String(taskData.time_tracking || ""),
           project_id: parseInt(taskData.projectId) || 0,
           Tags: taskData.tags || ""
         }
@@ -311,11 +311,11 @@ export const startTaskTimer = async (id) => {
 
 export const stopTaskTimer = async (id) => {
   try {
-    const params = {
+const params = {
       records: [
         {
           Id: parseInt(id),
-          active_timer: ""
+          active_timer: String("")
         }
       ]
     };
