@@ -11,7 +11,8 @@ const ProjectModal = ({
   onClose, 
   onSubmit, 
   project = null,
-  title = "Create New Project"
+  title = "Create New Project",
+  preSelectedClient = null
 }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -35,7 +36,7 @@ const ProjectModal = ({
     }
   }, [isOpen]);
 
-  // Populate form when editing existing project
+// Populate form when editing existing project or with pre-selected client
   useEffect(() => {
     if (project) {
       setFormData({
@@ -51,7 +52,7 @@ const ProjectModal = ({
       setFormData({
         name: '',
         description: '',
-        clientId: '',
+        clientId: preSelectedClient ? preSelectedClient.Id : '',
         status: 'planning',
         budget: '',
         startDate: '',
@@ -59,7 +60,7 @@ const ProjectModal = ({
       });
     }
     setErrors({});
-  }, [project]);
+  }, [project, preSelectedClient]);
 
 const loadClients = async () => {
     try {
@@ -211,7 +212,23 @@ size="lg"
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Client *
           </label>
-          {loadingClients ? (
+          {preSelectedClient ? (
+            <div className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                         bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-medium">{preSelectedClient.Name}</span>
+                  <span className="text-gray-500 dark:text-gray-400 ml-2">- {preSelectedClient.company}</span>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  (Pre-selected)
+                </div>
+              </div>
+              <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                Company: {preSelectedClient.company} | Status: {preSelectedClient.status}
+              </div>
+            </div>
+          ) : loadingClients ? (
             <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-12 rounded-lg"></div>
           ) : (
             <select
@@ -235,7 +252,7 @@ size="lg"
           {errors.clientId && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.clientId}</p>
           )}
-          {getSelectedClientDetails() && (
+          {!preSelectedClient && getSelectedClientDetails() && (
             <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               Company: {getSelectedClientDetails().company} | Status: {getSelectedClientDetails().status}
             </div>
