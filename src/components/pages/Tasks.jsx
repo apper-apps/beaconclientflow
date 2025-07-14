@@ -626,6 +626,9 @@ try {
               });
               
               toast.success("Task created successfully!");
+              
+              // Navigate to the project detail page to show the new task
+              navigate(`/projects/${taskFormData.projectId}`);
             } catch (error) {
               console.error("Error creating task:", error);
               toast.error("Failed to create task. Please try again.");
