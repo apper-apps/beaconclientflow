@@ -254,7 +254,7 @@ const getDaysRemaining = () => {
                 {project.Name}
 </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                {client?.Name || `Client ID: ${project.client_id}`}
+                {client?.Name || "Client not found"}
               </p>
             </div>
           </div>
@@ -514,7 +514,7 @@ const getDaysRemaining = () => {
                     Client
 </label>
                   <p className="text-gray-900 dark:text-white">
-                    {client?.Name || `Client ID: ${project.client_id}`}
+                    {client?.Name || "Client not found"}
                   </p>
                 </div>
                 <div>
