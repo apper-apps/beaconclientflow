@@ -35,8 +35,26 @@ const ProjectModal = ({
       loadClients();
     }
   }, [isOpen]);
+// Helper function to format date for HTML date input
+  const formatDateForInput = (dateValue) => {
+    if (!dateValue) return '';
+    
+    try {
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return '';
+      
+      // Format as YYYY-MM-DD for HTML date input
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  };
 
-// Populate form when editing existing project or with pre-selected client
 // Populate form when editing existing project or with pre-selected client
   useEffect(() => {
     if (project) {
@@ -46,8 +64,8 @@ const ProjectModal = ({
         clientId: project.client_id?.Id || project.client_id || '',
         status: project.status || 'planning',
         budget: project.budget || '',
-        startDate: project.start_date || '',
-        endDate: project.end_date || ''
+        startDate: formatDateForInput(project.start_date),
+        endDate: formatDateForInput(project.end_date)
       });
     } else {
       setFormData({
@@ -57,7 +75,7 @@ const ProjectModal = ({
         status: 'planning',
         budget: '',
         startDate: '',
-endDate: ''
+        endDate: ''
       });
     }
     setErrors({});
