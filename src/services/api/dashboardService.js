@@ -311,23 +311,42 @@ export const getDashboardData = async () => {
   }
 };
 
-// Helper function to format time ago
+// Helper function to format time ago with improved accuracy
 const formatTimeAgo = (dateString) => {
   if (!dateString) return "Unknown time";
   
   const now = new Date();
   const date = new Date(dateString);
   const diffMs = now - date;
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffHours / 24);
   
-  if (diffHours < 1) {
+  // Calculate precise time differences
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffWeeks = Math.floor(diffDays / 7);
+  
+  // Handle very recent activities (less than 1 minute)
+  if (diffMinutes < 1) {
     return "Just now";
-  } else if (diffHours < 24) {
+  }
+  // Handle activities within the last hour with minute precision
+  else if (diffMinutes < 60) {
+    return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+  }
+  // Handle activities within the last day with hour precision
+  else if (diffHours < 24) {
     return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  } else if (diffDays < 7) {
+  }
+  // Handle activities within the last week with day precision
+  else if (diffDays < 7) {
     return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-  } else {
+  }
+  // Handle activities within the last month with week precision
+  else if (diffWeeks < 4) {
+    return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
+  }
+  // For older activities, show the actual date
+  else {
     return date.toLocaleDateString();
   }
 };
