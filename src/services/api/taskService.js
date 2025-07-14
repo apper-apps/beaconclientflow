@@ -1,3 +1,4 @@
+import { logUserActivity } from "@/services/api/recentActivityService";
 const { ApperClient } = window.ApperSDK;
 const apperClient = new ApperClient({
   apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
@@ -12,8 +13,8 @@ export const getAllTasks = async () => {
         { field: { Name: "title" } },
         { field: { Name: "priority" } },
         { field: { Name: "status" } },
-        { field: { Name: "due_date" } },
-{ field: { Name: "total_time" } },
+{ field: { Name: "due_date" } },
+        { field: { Name: "total_time" } },
         { field: { Name: "active_timer" } },
         { field: { Name: "time_tracking" } },
         { 
@@ -56,8 +57,8 @@ export const getTaskById = async (id) => {
         { field: { Name: "title" } },
         { field: { Name: "priority" } },
         { field: { Name: "status" } },
-        { field: { Name: "due_date" } },
-{ field: { Name: "total_time" } },
+{ field: { Name: "due_date" } },
+        { field: { Name: "total_time" } },
         { field: { Name: "active_timer" } },
         { field: { Name: "time_tracking" } },
         { 
@@ -91,8 +92,8 @@ export const createTask = async (taskData) => {
     const params = {
       records: [
         {
-          Name: taskData.name || taskData.title,
-title: taskData.title,
+Name: taskData.name || taskData.title,
+          title: taskData.title,
           priority: taskData.priority,
           status: taskData.status,
           due_date: taskData.dueDate,
@@ -116,8 +117,8 @@ title: taskData.title,
       const successfulRecords = response.results.filter(result => result.success);
       const failedRecords = response.results.filter(result => !result.success);
       
-      if (failedRecords.length > 0) {
-        console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+if (failedRecords.length > 0) {
+        console.error(`Failed to create ${failedRecords.length} records: ${JSON.stringify(failedRecords)}`);
         throw new Error(failedRecords[0].message || "Failed to create task");
       }
       
@@ -164,9 +165,9 @@ export const updateTask = async (id, taskData) => {
           Tags: taskData.tags || ""
         }
       ]
-    };
+};
+
     const response = await apperClient.updateRecord("task", params);
-    
     if (!response.success) {
       console.error(response.message);
       throw new Error(response.message);
@@ -176,8 +177,8 @@ export const updateTask = async (id, taskData) => {
       const successfulUpdates = response.results.filter(result => result.success);
       const failedUpdates = response.results.filter(result => !result.success);
       
-      if (failedUpdates.length > 0) {
-        console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+if (failedUpdates.length > 0) {
+        console.error(`Failed to update ${failedUpdates.length} records: ${JSON.stringify(failedUpdates)}`);
         throw new Error(failedUpdates[0].message || "Failed to update task");
       }
       
@@ -228,8 +229,8 @@ export const updateTaskStatus = async (id, status) => {
       const successfulUpdates = response.results.filter(result => result.success);
       const failedUpdates = response.results.filter(result => !result.success);
       
-      if (failedUpdates.length > 0) {
-        console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+if (failedUpdates.length > 0) {
+        console.error(`Failed to update ${failedUpdates.length} records: ${JSON.stringify(failedUpdates)}`);
         throw new Error(failedUpdates[0].message || "Failed to update task status");
       }
       
@@ -257,8 +258,8 @@ export const deleteTask = async (id) => {
     if (response.results) {
       const failedDeletions = response.results.filter(result => !result.success);
       
-      if (failedDeletions.length > 0) {
-        console.error(`Failed to delete ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
+if (failedDeletions.length > 0) {
+        console.error(`Failed to delete ${failedDeletions.length} records: ${JSON.stringify(failedDeletions)}`);
         throw new Error(failedDeletions[0].message || "Failed to delete task");
       }
       
@@ -270,8 +271,6 @@ export const deleteTask = async (id) => {
   }
 };
 
-export const startTaskTimer = async (id) => {
-  try {
 export const startTaskTimer = async (id) => {
   try {
     const now = new Date().toISOString();
@@ -297,42 +296,7 @@ export const startTaskTimer = async (id) => {
       const failedUpdates = response.results.filter(result => !result.success);
       
       if (failedUpdates.length > 0) {
-        console.error(`Failed to start timer for ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
-        throw new Error(failedUpdates[0].message || "Failed to start timer");
-      }
-      
-      return {
-        Id: parseInt(id),
-        startTime: now
-      };
-    }
-  } catch (error) {
-    console.error("Error starting timer:", error);
-    throw new Error(`Failed to start timer: ${error.message}`);
-  }
-};
-    const params = {
-      records: [
-        {
-          Id: parseInt(id),
-          active_timer: now
-        }
-      ]
-    };
-
-    const response = await apperClient.updateRecord("task", params);
-    
-    if (!response.success) {
-      console.error(response.message);
-      throw new Error(response.message);
-    }
-
-    if (response.results) {
-      const successfulUpdates = response.results.filter(result => result.success);
-      const failedUpdates = response.results.filter(result => !result.success);
-      
-      if (failedUpdates.length > 0) {
-        console.error(`Failed to start timer for ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+        console.error(`Failed to start timer for ${failedUpdates.length} records: ${JSON.stringify(failedUpdates)}`);
         throw new Error(failedUpdates[0].message || "Failed to start timer");
       }
       
@@ -349,7 +313,7 @@ export const startTaskTimer = async (id) => {
 
 export const stopTaskTimer = async (id) => {
   try {
-const params = {
+    const params = {
       records: [
         {
           Id: parseInt(id),
@@ -369,8 +333,8 @@ const params = {
       const successfulUpdates = response.results.filter(result => result.success);
       const failedUpdates = response.results.filter(result => !result.success);
       
-      if (failedUpdates.length > 0) {
-        console.error(`Failed to stop timer for ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+if (failedUpdates.length > 0) {
+        console.error(`Failed to stop timer for ${failedUpdates.length} records: ${JSON.stringify(failedUpdates)}`);
         throw new Error(failedUpdates[0].message || "Failed to stop timer");
       }
       
