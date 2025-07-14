@@ -187,6 +187,76 @@ const getStatusIcon = (status) => {
     return icons[status] || "Circle";
   };
 
+  const handleExport = () => {
+    try {
+      if (filteredTasks.length === 0) {
+        toast.warning("No tasks to export");
+        return;
+      }
+
+      // Create CSV headers
+      const headers = [
+        "Title",
+        "Status", 
+        "Priority",
+        "Due Date",
+        "Project",
+        "Total Time (hours)",
+        "Tags",
+        "Created On"
+      ];
+
+      // Convert tasks to CSV rows
+      const csvRows = filteredTasks.map(task => {
+        const projectName = typeof task.project_id === 'object' && task.project_id?.Name 
+          ? task.project_id.Name 
+          : (typeof task.project_id === 'string' || typeof task.project_id === 'number' 
+            ? String(task.project_id) 
+            : 'Unknown');
+        
+        const totalTimeHours = task.total_time 
+          ? (task.total_time / 3600000).toFixed(2) // Convert milliseconds to hours
+          : '0.00';
+
+        return [
+          `"${(task.title || '').replace(/"/g, '""')}"`, // Escape quotes
+          `"${(task.status || '').replace(/-/g, ' ')}"`,
+          `"${(task.priority || '').charAt(0).toUpperCase() + (task.priority || '').slice(1)}"`,
+          `"${task.due_date ? new Date(task.due_date).toLocaleDateString() : ''}"`,
+          `"${projectName.replace(/"/g, '""')}"`,
+          `"${totalTimeHours}"`,
+          `"${(task.Tags || '').replace(/"/g, '""')}"`,
+          `"${task.CreatedOn ? new Date(task.CreatedOn).toLocaleDateString() : ''}"`
+        ].join(',');
+      });
+
+      // Combine headers and rows
+      const csvContent = [headers.join(','), ...csvRows].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `tasks_export_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        toast.success(`Exported ${filteredTasks.length} tasks successfully`);
+      } else {
+        throw new Error('Download not supported in this browser');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export tasks. Please try again.');
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -300,7 +370,7 @@ const getStatusIcon = (status) => {
             <option value="high">High</option>
           </select>
           
-          <Button variant="outline" size="sm">
+<Button variant="outline" size="sm" onClick={handleExport}>
             <ApperIcon name="Download" size={16} className="mr-2" />
             Export
           </Button>
