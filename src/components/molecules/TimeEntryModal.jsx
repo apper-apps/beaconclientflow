@@ -89,12 +89,26 @@ const TimeEntryModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
     }
   }, [formData.clientId, allProjects]);
 
-  // Filter tasks when project changes
+// Filter tasks when project changes
   useEffect(() => {
     if (formData.projectId) {
-      const projectTasks = allTasks.filter(
-        task => task.project_id === parseInt(formData.projectId)
-      );
+      console.log('Filtering tasks for project:', formData.projectId);
+      console.log('All tasks:', allTasks);
+      
+      const selectedProjectId = parseInt(formData.projectId);
+      const projectTasks = allTasks.filter(task => {
+        // Handle both direct project_id and nested project_id object
+        const taskProjectId = task.project_id?.Id || task.project_id;
+        const parsedTaskProjectId = parseInt(taskProjectId);
+        
+        // Only include active tasks
+        const isActiveTask = ['todo', 'in-progress', 'review'].includes(task.status);
+        
+        console.log(`Task "${task.title || task.Name}" project_id:`, taskProjectId, 'status:', task.status, 'comparing with:', selectedProjectId);
+        return parsedTaskProjectId === selectedProjectId && isActiveTask;
+      });
+      
+      console.log('Filtered tasks for project:', projectTasks);
       setTasks(projectTasks);
       
       // Reset task if current selection is not valid
@@ -145,13 +159,26 @@ const loadAllProjects = async () => {
     }
   };
 
-  const loadAllTasks = async () => {
+const loadAllTasks = async () => {
     try {
       setLoadingTasks(true);
       const tasksData = await getAllTasks();
-      setAllTasks(tasksData);
+      
+      // Filter to only active tasks
+      const activeTasks = tasksData.filter(task => {
+        const isActiveTask = ['todo', 'in-progress', 'review'].includes(task.status);
+        const hasValidProjectId = task.project_id && 
+          (typeof task.project_id === 'number' || 
+           (typeof task.project_id === 'object' && task.project_id.Id));
+        return isActiveTask && hasValidProjectId;
+      });
+      
+      console.log('Loaded active tasks:', activeTasks);
+      setAllTasks(activeTasks);
     } catch (error) {
+      console.error("Error loading tasks:", error);
       toast.error("Failed to load tasks");
+      setAllTasks([]);
     } finally {
       setLoadingTasks(false);
     }
