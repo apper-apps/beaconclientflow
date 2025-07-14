@@ -317,12 +317,12 @@ const handleClientUpdated = (updatedClient) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <Card className="p-6">
+<Card className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
               Projects ({projects.length})
             </h2>
-<Button 
+            <Button 
               variant="outline" 
               size="sm"
               onClick={() => setShowProjectModal(true)}
@@ -330,8 +330,9 @@ const handleClientUpdated = (updatedClient) => {
               <ApperIcon name="Plus" size={16} className="mr-2" />
               New Project
             </Button>
-
-{projects.length === 0 ? (
+          </div>
+          
+          {projects.length === 0 ? (
             <Empty
               title="No Projects Yet"
               description="This client doesn't have any projects yet. Create the first project to get started."
@@ -348,7 +349,7 @@ const handleClientUpdated = (updatedClient) => {
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                   className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
-<div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
                         <ApperIcon name={getStatusIcon(project.status)} size={14} className="text-white" />
