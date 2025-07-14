@@ -1,6 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
 import Badge from "@/components/atoms/Badge";
 import Card from "@/components/atoms/Card";
@@ -8,10 +10,36 @@ import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import { getAll, getRecentActivities } from "@/services/api/recentActivityService";
 const RecentActivity = ({ recentActivity: propRecentActivity }) => {
+  const navigate = useNavigate();
   const { recentActivity, activityLoading, activityError } = useSelector((state) => state.dashboard);
   
   // Use Redux data if available, otherwise fall back to prop data
   const displayActivity = recentActivity?.length > 0 ? recentActivity : (propRecentActivity || []);
+
+  const handleActivityClick = (activity) => {
+    try {
+      // Determine navigation target based on activity type and entity IDs
+      if (activity.client_id) {
+        navigate(`/clients/${activity.client_id}`);
+        toast.success("Navigating to client details");
+      } else if (activity.project_id) {
+        navigate(`/projects/${activity.project_id}`);
+        toast.success("Navigating to project details");
+      } else if (activity.task_id) {
+        navigate(`/tasks/${activity.task_id}`);
+        toast.success("Navigating to task details");
+      } else if (activity.invoice_id) {
+        navigate(`/invoices/${activity.invoice_id}`);
+        toast.success("Navigating to invoice details");
+      } else {
+        // For activities without specific entity associations, could show modal or general activity view
+        toast.info("Activity details not available");
+      }
+    } catch (error) {
+      console.error("Error navigating to activity details:", error);
+      toast.error("Failed to open activity details");
+    }
+  };
   
   // Show loading state
   if (activityLoading && (!displayActivity || displayActivity.length === 0)) {
@@ -107,9 +135,10 @@ const RecentActivity = ({ recentActivity: propRecentActivity }) => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+              onClick={() => handleActivityClick(activity)}
+              className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer group active:scale-[0.98]"
             >
-              <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center ${activity.iconColor}`}>
+              <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center ${activity.iconColor} group-hover:scale-105 transition-transform duration-200`}>
                 <ApperIcon name={activity.icon} size={16} />
               </div>
               
@@ -129,7 +158,7 @@ const RecentActivity = ({ recentActivity: propRecentActivity }) => {
                   )}
                 </div>
                 
-                <p className="text-sm text-gray-900 dark:text-white font-medium mb-1">
+                <p className="text-sm text-gray-900 dark:text-white font-medium mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
                   {activity.title}
                 </p>
                 
@@ -142,7 +171,7 @@ const RecentActivity = ({ recentActivity: propRecentActivity }) => {
                 <ApperIcon 
                   name="ChevronRight" 
                   size={16} 
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200" 
+                  className="text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all duration-200" 
                 />
               </div>
             </motion.div>

@@ -11,9 +11,12 @@ const initialState = {
   loading: false,
   error: null,
   lastUpdated: null,
-  recentActivity: [],
+recentActivity: [],
   activityLoading: false,
   activityError: null,
+  selectedActivity: null,
+  selectedActivityLoading: false,
+  selectedActivityError: null,
 };
 
 export const dashboardSlice = createSlice({
@@ -64,7 +67,7 @@ reducers: {
     setActivityError: (state, action) => {
       state.activityError = action.payload;
       state.activityLoading = false;
-    },
+},
     addRecentActivity: (state, action) => {
       state.recentActivity.unshift(action.payload);
       if (state.recentActivity.length > 10) {
@@ -76,6 +79,23 @@ reducers: {
       if (index !== -1) {
         state.recentActivity[index] = action.payload;
       }
+    },
+    setSelectedActivity: (state, action) => {
+      state.selectedActivity = action.payload;
+      state.selectedActivityLoading = false;
+      state.selectedActivityError = null;
+    },
+    setSelectedActivityLoading: (state, action) => {
+      state.selectedActivityLoading = action.payload;
+    },
+    setSelectedActivityError: (state, action) => {
+      state.selectedActivityError = action.payload;
+      state.selectedActivityLoading = false;
+    },
+    clearSelectedActivity: (state) => {
+      state.selectedActivity = null;
+      state.selectedActivityLoading = false;
+      state.selectedActivityError = null;
     },
     clearMetrics: (state) => {
       state.metrics = initialState.metrics;
@@ -100,9 +120,13 @@ export const {
   updateInvoiceCount,
   setActivityLoading,
   setRecentActivity,
-  setActivityError,
+setActivityError,
   addRecentActivity,
   updateRecentActivity,
+  setSelectedActivity,
+  setSelectedActivityLoading,
+  setSelectedActivityError,
+  clearSelectedActivity,
   clearMetrics,
   clearRecentActivity,
 } = dashboardSlice.actions;
