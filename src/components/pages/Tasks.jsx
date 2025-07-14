@@ -357,11 +357,11 @@ const getStatusIcon = (status) => {
 <div className="flex-1">
                           <h3 className={`font-semibold text-gray-900 dark:text-white mb-1 ${
                             task.status === "done" ? "line-through opacity-60" : ""
-                          }`}>
+}`}>
                             {task.title}
                           </h3>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Project: {typeof task.project_id === 'object' && task.project_id?.Name ? task.project_id.Name : (task.project_id || 'Unknown')}
+                            Project: {typeof task.project_id === 'object' && task.project_id?.Name ? task.project_id.Name : (typeof task.project_id === 'string' || typeof task.project_id === 'number' ? String(task.project_id) : 'Unknown')}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
