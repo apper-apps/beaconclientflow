@@ -60,12 +60,23 @@ const TimeEntryModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
     }
   }, [isOpen, initialData]);
 
-  // Filter projects when client changes
+// Filter projects when client changes
   useEffect(() => {
     if (formData.clientId) {
-      const clientProjects = allProjects.filter(
-        project => project.client_id === parseInt(formData.clientId)
-      );
+      console.log('Filtering projects for client:', formData.clientId);
+      console.log('All projects:', allProjects);
+      
+      const selectedClientId = parseInt(formData.clientId);
+      const clientProjects = allProjects.filter(project => {
+        // Handle both direct client_id and nested client_id object
+        const projectClientId = project.client_id?.Id || project.client_id;
+        const parsedProjectClientId = parseInt(projectClientId);
+        
+        console.log(`Project "${project.Name}" client_id:`, projectClientId, 'comparing with:', selectedClientId);
+        return parsedProjectClientId === selectedClientId;
+      });
+      
+      console.log('Filtered projects:', clientProjects);
       setProjects(clientProjects);
       
       // Reset project and task if current selection is not valid
@@ -109,13 +120,26 @@ const TimeEntryModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
     }
   };
 
-  const loadAllProjects = async () => {
+const loadAllProjects = async () => {
     try {
       setLoadingProjects(true);
       const projectsData = await getAllProjects();
-      setAllProjects(projectsData);
+      
+      // Filter to only active projects and ensure they have valid client_id
+      const validProjects = projectsData.filter(project => {
+        const hasValidClientId = project.client_id && 
+          (typeof project.client_id === 'number' || 
+           (typeof project.client_id === 'object' && project.client_id.Id));
+        const isActiveProject = ['active', 'planning'].includes(project.status);
+        return hasValidClientId && isActiveProject;
+      });
+      
+      console.log('Loaded projects:', validProjects);
+      setAllProjects(validProjects);
     } catch (error) {
+      console.error("Error loading projects:", error);
       toast.error("Failed to load projects");
+      setAllProjects([]);
     } finally {
       setLoadingProjects(false);
     }
