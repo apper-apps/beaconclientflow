@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
-import Modal from '@/components/atoms/Modal';
-import Button from '@/components/atoms/Button';
-import Input from '@/components/atoms/Input';
-import Badge from '@/components/atoms/Badge';
-import { getAllClients } from '@/services/api/clientService';
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import Modal from "@/components/atoms/Modal";
+import { getAllClients } from "@/services/api/clientService";
 
 const ProjectModal = ({ 
   isOpen, 
@@ -37,6 +37,7 @@ const ProjectModal = ({
   }, [isOpen]);
 
 // Populate form when editing existing project or with pre-selected client
+// Populate form when editing existing project or with pre-selected client
   useEffect(() => {
     if (project) {
       setFormData({
@@ -56,13 +57,13 @@ const ProjectModal = ({
         status: 'planning',
         budget: '',
         startDate: '',
-        endDate: ''
+endDate: ''
       });
     }
     setErrors({});
   }, [project, preSelectedClient]);
 
-const loadClients = async () => {
+  const loadClients = async () => {
     try {
       setLoadingClients(true);
       const clientsData = await getAllClients();
