@@ -281,8 +281,8 @@ actionLabel="Create Project"
 <h3 className="font-semibold text-gray-900 dark:text-white truncate mb-1">
                     {project.Name || project.name || 'Unnamed Project'}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {getClientName(project.client_id)}
+<p className="text-sm text-gray-600 dark:text-gray-400">
+                    {typeof project.client_id === 'object' && project.client_id?.Name ? project.client_id.Name : getClientName(project.client_id)}
                   </p>
                 </div>
                 
