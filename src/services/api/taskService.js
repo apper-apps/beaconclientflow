@@ -13,10 +13,13 @@ export const getAllTasks = async () => {
         { field: { Name: "priority" } },
         { field: { Name: "status" } },
         { field: { Name: "due_date" } },
-        { field: { Name: "total_time" } },
+{ field: { Name: "total_time" } },
         { field: { Name: "active_timer" } },
         { field: { Name: "time_tracking" } },
-        { field: { Name: "project_id" } },
+        { 
+          field: { Name: "project_id" },
+          referenceField: { field: { Name: "Name" } }
+        },
         { field: { Name: "Tags" } }
       ],
       orderBy: [
@@ -54,10 +57,13 @@ export const getTaskById = async (id) => {
         { field: { Name: "priority" } },
         { field: { Name: "status" } },
         { field: { Name: "due_date" } },
-        { field: { Name: "total_time" } },
+{ field: { Name: "total_time" } },
         { field: { Name: "active_timer" } },
         { field: { Name: "time_tracking" } },
-        { field: { Name: "project_id" } },
+        { 
+          field: { Name: "project_id" },
+          referenceField: { field: { Name: "Name" } }
+        },
         { field: { Name: "Tags" } }
       ]
     };
